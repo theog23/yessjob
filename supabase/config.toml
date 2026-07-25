@@ -1,0 +1,14 @@
+# Config minima para Supabase CLI.
+# El project_id se sobrescribe con `supabase link --project-ref <ref>`.
+project_id = "scraper-plataforma"
+
+[api]
+enabled = true
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 15
+
+[db.migrations]
+enabled = true
