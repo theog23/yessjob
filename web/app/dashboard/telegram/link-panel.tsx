@@ -29,8 +29,8 @@ export function LinkPanel() {
 
   if (href) {
     return (
-      <div className="panel p-6">
-        <p className="text-sm text-ink-0">Token generado. Valido por 15 minutos.</p>
+      <div className="panel rounded-3xl p-6">
+        <p className="text-sm text-ink-0">Enlace generado. Valido por 15 minutos.</p>
         <p className="mt-2 text-sm text-ink-500">
           Toca el boton para abrir Telegram y confirmar la vinculacion desde ahi.
         </p>
@@ -42,14 +42,14 @@ export function LinkPanel() {
   }
 
   return (
-    <div className="panel p-6">
+    <div className="panel rounded-3xl p-6">
       <p className="text-sm text-ink-0">Tu cuenta todavia no esta vinculada.</p>
       <p className="mt-2 text-sm text-ink-500">
-        Generamos un enlace de un solo uso que abre el bot y confirma la
-        vinculacion automaticamente.
+        Generamos un enlace de un solo uso que confirma la vinculacion con tu
+        cuenta automaticamente.
       </p>
       {error && (
-        <p className="mt-4 border border-ink-700 bg-ink-900 px-4 py-3 text-sm text-ink-200">
+        <p className="mt-4 rounded-2xl border border-ink-700 bg-ink-900 px-4 py-3 text-sm text-ink-300">
           {error}
         </p>
       )}

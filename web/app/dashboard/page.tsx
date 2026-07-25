@@ -30,19 +30,16 @@ export default async function DashboardPage() {
   return (
     <div className="animate-fadeUp">
       <p className="label-eyebrow mb-2">resumen</p>
-      <h1 className="text-2xl font-medium tracking-tight text-ink-0">
+      <h1 className="font-serif text-3xl text-ink-0">
         Hola{active?.email ? `, ${active.email.split("@")[0]}` : ""}.
       </h1>
       <p className="mt-2 text-sm text-ink-500">
-        Este es el estado actual de tu monitoreo.
+        Este es el estado actual de tu busqueda.
       </p>
 
-      <div className="mt-10 grid gap-px overflow-hidden border border-ink-800 bg-ink-800 sm:grid-cols-3">
+      <div className="mt-10 grid gap-4 sm:grid-cols-3">
         <Stat label="filtros activos" value={String(activeCount)} />
-        <Stat
-          label="proyectos recibidos"
-          value={String(notifCount ?? 0)}
-        />
+        <Stat label="proyectos recibidos" value={String(notifCount ?? 0)} />
         <Stat
           label="telegram"
           value={active?.telegram_chat_id ? "conectado" : "pendiente"}
@@ -51,14 +48,14 @@ export default async function DashboardPage() {
       </div>
 
       {!active?.telegram_chat_id && (
-        <div className="mt-8 border border-ink-0 p-6">
-          <p className="text-sm font-medium text-ink-0">
+        <div className="glass-dark mt-8 rounded-3xl p-6">
+          <p className="font-serif text-lg text-ink-950">
             Falta un paso: conecta tu Telegram
           </p>
-          <p className="mt-2 text-sm text-ink-400">
-            Sin Telegram vinculado no vas a recibir ninguna notificacion.
+          <p className="mt-2 text-sm text-ink-700">
+            Sin Telegram vinculado no vas a recibir ningun aviso.
           </p>
-          <Link href="/dashboard/telegram" className="btn-primary mt-4">
+          <Link href="/dashboard/telegram" className="btn-primary mt-4 !bg-ink-950 !text-ink-0">
             Conectar ahora
           </Link>
         </div>
@@ -67,14 +64,14 @@ export default async function DashboardPage() {
       <div className="mt-10">
         <div className="mb-4 flex items-center justify-between">
           <p className="label-eyebrow">tus filtros</p>
-          <Link href="/dashboard/platforms" className="font-mono text-xs text-ink-400 hover:text-ink-0">
+          <Link href="/dashboard/platforms" className="text-xs text-ink-400 hover:text-ink-0">
             administrar →
           </Link>
         </div>
 
         {rows.length === 0 ? (
-          <div className="panel p-8 text-center">
-            <p className="text-sm text-ink-400">
+          <div className="panel rounded-3xl p-8 text-center">
+            <p className="text-sm text-ink-500">
               Todavia no configuraste ninguna plataforma.
             </p>
             <Link href="/dashboard/platforms" className="btn-secondary mt-4">
@@ -82,20 +79,18 @@ export default async function DashboardPage() {
             </Link>
           </div>
         ) : (
-          <div className="divide-y divide-ink-800 border border-ink-800">
+          <div className="panel divide-y divide-ink-800 rounded-3xl">
             {rows.map((r) => (
-              <div key={r.id} className="flex items-center justify-between px-5 py-4">
+              <div key={r.id} className="flex items-center justify-between px-6 py-4">
                 <div>
-                  <p className="font-mono text-xs uppercase text-ink-0">
+                  <p className="text-sm font-medium capitalize text-ink-0">
                     {r.platform} · {r.sectors?.name ?? "—"}
                   </p>
                   <p className="mt-1 text-xs text-ink-500">
-                    {r.keywords.length > 0 ? r.keywords.join(", ") : "sin keywords especificas"}
+                    {r.keywords.length > 0 ? r.keywords.join(", ") : "sin palabras clave especificas"}
                   </p>
                 </div>
-                <span
-                  className={`status-dot ${r.is_active ? "bg-ink-0" : "bg-ink-700"}`}
-                />
+                <span className={`status-dot ${r.is_active ? "bg-ink-0" : "bg-ink-600"}`} />
               </div>
             ))}
           </div>
@@ -115,9 +110,9 @@ function Stat({
   warn?: boolean;
 }) {
   return (
-    <div className="bg-ink-950 p-6">
+    <div className="panel rounded-3xl p-6">
       <p className="label-eyebrow">{label}</p>
-      <p className={`mt-2 font-mono text-2xl ${warn ? "text-ink-400" : "text-ink-0"}`}>
+      <p className={`mt-2 font-serif text-3xl ${warn ? "text-ink-500" : "text-ink-0"}`}>
         {value}
       </p>
     </div>

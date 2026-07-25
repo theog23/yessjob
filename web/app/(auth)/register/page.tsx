@@ -13,7 +13,7 @@ export default function RegisterPage() {
     return (
       <div>
         <p className="label-eyebrow mb-2">listo</p>
-        <h1 className="text-2xl font-medium tracking-tight text-ink-0">
+        <h1 className="font-serif text-2xl text-ink-0">
           Revisa tu email
         </h1>
         <p className="mt-4 text-sm leading-relaxed text-ink-400">{state.success}</p>
@@ -27,7 +27,7 @@ export default function RegisterPage() {
   return (
     <div>
       <p className="label-eyebrow mb-2">nueva cuenta</p>
-      <h1 className="text-2xl font-medium tracking-tight text-ink-0">
+      <h1 className="font-serif text-2xl text-ink-0">
         Crear cuenta
       </h1>
       <p className="mt-2 text-sm text-ink-500">
@@ -71,7 +71,7 @@ export default function RegisterPage() {
         </div>
 
         {state.error && (
-          <p className="border border-ink-700 bg-ink-900 px-4 py-3 text-sm text-ink-200">
+          <p className="rounded-2xl border border-ink-700 bg-ink-900 px-4 py-3 text-sm text-ink-300">
             {state.error}
           </p>
         )}

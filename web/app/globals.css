@@ -7,10 +7,11 @@
     @apply border-ink-800;
   }
   html {
-    color-scheme: dark;
+    color-scheme: light;
   }
   body {
-    @apply bg-ink-950 text-ink-50 antialiased;
+    @apply bg-ink-950 text-ink-0 antialiased;
+    background-color: #fefefc;
   }
   ::selection {
     @apply bg-ink-0 text-ink-950;
@@ -19,27 +20,28 @@
 
 @layer components {
   .label-eyebrow {
-    @apply font-mono text-[11px] uppercase tracking-widest2 text-ink-500;
+    @apply font-sans text-[11px] font-medium uppercase tracking-widest2 text-ink-500;
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 bg-ink-0 px-5 py-3 text-sm font-medium text-ink-950 transition-colors hover:bg-ink-200 disabled:cursor-not-allowed disabled:opacity-40;
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-ink-0 px-6 py-3.5 text-sm font-medium text-ink-950 shadow-soft transition-all duration-300 hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 border border-ink-700 bg-transparent px-5 py-3 text-sm font-medium text-ink-50 transition-colors hover:border-ink-0 disabled:cursor-not-allowed disabled:opacity-40;
+    @apply glass inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 text-sm font-medium text-ink-0 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100;
   }
 
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-sm text-ink-400 transition-colors hover:text-ink-0;
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm text-ink-500 transition-colors hover:text-ink-0;
   }
 
   .field-input {
-    @apply w-full border border-ink-700 bg-ink-900 px-4 py-3 text-sm text-ink-50 outline-none transition-colors placeholder:text-ink-600 focus:border-ink-0;
+    @apply w-full rounded-2xl border border-ink-700 bg-white/70 px-4 py-3.5 text-sm text-ink-0 outline-none backdrop-blur-sm transition-all placeholder:text-ink-600 focus:border-ink-300 focus:bg-white focus:ring-4 focus:ring-ink-0/5;
   }
 
+  /* Panel liviano: usado para tarjetas de contenido en el dashboard */
   .panel {
-    @apply border border-ink-800 bg-ink-900/60;
+    @apply glass rounded-3xl;
   }
 
   .status-dot {
@@ -48,9 +50,42 @@
 }
 
 @layer utilities {
-  .bg-grid {
-    background-image: linear-gradient(to right, #ffffff08 1px, transparent 1px),
-      linear-gradient(to bottom, #ffffff08 1px, transparent 1px);
-    background-size: 40px 40px;
+  /* --- Liquid Glass --- */
+  .glass {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.48));
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    backdrop-filter: blur(24px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow:
+      0 1px 1px 0 rgba(0, 0, 0, 0.04),
+      0 8px 30px -8px rgba(0, 0, 0, 0.12),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.7);
+  }
+
+  .glass-dark {
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.82), rgba(20, 20, 18, 0.7));
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    backdrop-filter: blur(24px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+      0 8px 30px -8px rgba(0, 0, 0, 0.45),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
+  }
+
+  /* --- Wordmark: yess = blanco con borde negro / job = negro con borde blanco --- */
+  .brand-yess {
+    color: #ffffff;
+    -webkit-text-stroke: 1.5px #000000;
+    paint-order: stroke fill;
+  }
+  .brand-job {
+    color: #000000;
+    -webkit-text-stroke: 1.5px #ffffff;
+    paint-order: stroke fill;
+  }
+
+  /* --- Formas flotantes de fondo --- */
+  .blob {
+    @apply pointer-events-none absolute rounded-full blur-3xl;
   }
 }

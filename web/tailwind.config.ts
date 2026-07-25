@@ -9,48 +9,59 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // Escala espejada: 950 = blanco (fondo), 0 = negro (texto).
+        // Todo lo que ya referenciaba ink-950/ink-0/etc en el codigo
+        // se reacomoda automaticamente al tema claro.
         ink: {
-          950: "#000000",
-          900: "#0a0a0a",
-          850: "#111111",
-          800: "#1a1a1a",
-          700: "#262626",
-          600: "#404040",
-          500: "#737373",
-          400: "#a3a3a3",
-          300: "#d4d4d4",
-          200: "#e5e5e5",
-          100: "#f2f2f2",
-          50: "#fafafa",
-          0: "#ffffff",
+          950: "#ffffff",
+          900: "#fbfbf9",
+          850: "#f6f5f2",
+          800: "#ece9e3",
+          700: "#dbd7cf",
+          600: "#b8b3a8",
+          500: "#8a8478",
+          400: "#565149",
+          300: "#332f2a",
+          200: "#1f1c19",
+          100: "#121110",
+          50: "#080807",
+          0: "#000000",
         },
       },
       fontFamily: {
-        sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
-        mono: ["var(--font-geist-mono)", "ui-monospace", "monospace"],
-      },
-      backgroundImage: {
-        grid: "linear-gradient(to right, #ffffff08 1px, transparent 1px), linear-gradient(to bottom, #ffffff08 1px, transparent 1px)",
-      },
-      backgroundSize: {
-        grid: "40px 40px",
+        serif: ["var(--font-display)", "Georgia", "serif"],
+        sans: ["var(--font-body)", "system-ui", "sans-serif"],
       },
       letterSpacing: {
-        widest2: "0.2em",
+        widest2: "0.16em",
+      },
+      borderRadius: {
+        "4xl": "2rem",
+        "5xl": "2.5rem",
+      },
+      boxShadow: {
+        glass: "0 1px 1px 0 rgba(0,0,0,0.04), 0 8px 30px -8px rgba(0,0,0,0.12), inset 0 1px 0 0 rgba(255,255,255,0.6)",
+        "glass-sm": "0 1px 1px 0 rgba(0,0,0,0.04), 0 4px 16px -6px rgba(0,0,0,0.10), inset 0 1px 0 0 rgba(255,255,255,0.6)",
+        soft: "0 20px 60px -20px rgba(0,0,0,0.15)",
       },
       keyframes: {
-        blink: {
-          "0%, 49%": { opacity: "1" },
-          "50%, 100%": { opacity: "0" },
-        },
         fadeUp: {
-          from: { opacity: "0", transform: "translateY(8px)" },
+          from: { opacity: "0", transform: "translateY(10px)" },
           to: { opacity: "1", transform: "translateY(0)" },
+        },
+        drift: {
+          "0%, 100%": { transform: "translate(0, 0) scale(1)" },
+          "50%": { transform: "translate(3%, -4%) scale(1.05)" },
+        },
+        driftSlow: {
+          "0%, 100%": { transform: "translate(0, 0) scale(1)" },
+          "50%": { transform: "translate(-4%, 3%) scale(1.08)" },
         },
       },
       animation: {
-        blink: "blink 1s step-start infinite",
-        fadeUp: "fadeUp 0.5s ease-out both",
+        fadeUp: "fadeUp 0.6s ease-out both",
+        drift: "drift 16s ease-in-out infinite",
+        driftSlow: "driftSlow 22s ease-in-out infinite",
       },
     },
   },

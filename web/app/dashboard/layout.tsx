@@ -21,34 +21,37 @@ export default async function DashboardLayout({
     .maybeSingle();
 
   return (
-    <div className="min-h-screen bg-ink-950">
-      <div className="mx-auto flex max-w-6xl">
-        <aside className="sticky top-0 hidden h-screen w-56 shrink-0 flex-col justify-between border-r border-ink-800 py-6 md:flex">
+    <div className="relative min-h-screen overflow-x-clip bg-ink-950">
+      <div className="blob animate-drift left-[-10%] top-[-10%] h-96 w-96 bg-ink-0/[0.04]" />
+      <div className="blob animate-driftSlow right-[-15%] top-1/3 h-[28rem] w-[28rem] bg-ink-400/[0.06]" />
+
+      <div className="relative mx-auto flex max-w-6xl">
+        <aside className="sticky top-6 hidden h-[calc(100vh-3rem)] w-64 shrink-0 flex-col justify-between px-2 py-6 md:flex">
           <div>
-            <Link href="/" className="block px-4 pb-8">
+            <Link href="/" className="mb-8 block px-4">
               <Logo />
             </Link>
             <DashboardNav />
           </div>
 
-          <div className="space-y-4 px-4">
-            <div className="border border-ink-800 p-3">
+          <div className="space-y-4 px-2">
+            <div className="glass rounded-2xl p-4">
               <p className="label-eyebrow">plan</p>
-              <p className="mt-1 font-mono text-xs uppercase text-ink-0">
+              <p className="mt-1 font-serif text-lg capitalize text-ink-0">
                 {active?.plan_slug ?? "free"}
               </p>
-              <div className="mt-2 flex items-center gap-1.5">
+              <div className="mt-3 flex items-center gap-1.5">
                 <span
-                  className={`status-dot ${active?.telegram_chat_id ? "bg-ink-0" : "bg-ink-700"}`}
+                  className={`status-dot ${active?.telegram_chat_id ? "bg-ink-0" : "bg-ink-600"}`}
                 />
-                <span className="font-mono text-[11px] text-ink-500">
-                  {active?.telegram_chat_id ? "telegram conectado" : "telegram sin conectar"}
+                <span className="text-[11px] text-ink-500">
+                  {active?.telegram_chat_id ? "Telegram conectado" : "Telegram sin conectar"}
                 </span>
               </div>
             </div>
 
             <form action={logout}>
-              <button type="submit" className="btn-ghost w-full !justify-start !px-0">
+              <button type="submit" className="btn-ghost w-full !justify-start !px-2">
                 Cerrar sesion
               </button>
             </form>

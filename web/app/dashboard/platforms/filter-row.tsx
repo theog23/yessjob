@@ -12,11 +12,11 @@ export function FilterRow({ row }: { row: Row }) {
   return (
     <div className="flex items-center justify-between gap-4 px-5 py-4">
       <div className="min-w-0">
-        <p className="font-mono text-xs uppercase text-ink-0">
+        <p className="text-sm font-medium capitalize text-ink-0">
           {row.platform} · {row.sectors?.name ?? "—"}
         </p>
         <p className="mt-1 truncate text-xs text-ink-500">
-          {row.keywords.length > 0 ? row.keywords.join(", ") : "sin keywords especificas"}
+          {row.keywords.length > 0 ? row.keywords.join(", ") : "sin palabras clave especificas"}
           {row.min_budget_usd > 0 && ` · min USD ${row.min_budget_usd}`}
         </p>
       </div>
@@ -25,7 +25,7 @@ export function FilterRow({ row }: { row: Row }) {
         <button
           disabled={isPending}
           onClick={() => startTransition(() => toggleFilter(row.id, !row.is_active))}
-          className={`font-mono text-[11px] uppercase tracking-widest2 ${
+          className={`text-xs uppercase tracking-widest2 ${
             row.is_active ? "text-ink-0" : "text-ink-600"
           }`}
         >

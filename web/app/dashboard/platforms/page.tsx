@@ -28,18 +28,17 @@ export default async function PlatformsPage() {
   return (
     <div className="animate-fadeUp">
       <p className="label-eyebrow mb-2">configuracion</p>
-      <h1 className="text-2xl font-medium tracking-tight text-ink-0">Plataformas</h1>
+      <h1 className="font-serif text-3xl text-ink-0">Plataformas</h1>
       <p className="mt-2 max-w-lg text-sm text-ink-500">
-        Cada combinacion de plataforma + sector es un filtro independiente.
-        Tu plan{" "}
-        <span className="font-mono uppercase text-ink-300">{plan?.plan_slug ?? "free"}</span>{" "}
-        permite hasta {plan?.max_sectors ?? 1} filtro(s) y {plan?.max_keywords ?? 5} keywords
-        por filtro.
+        Cada combinacion de plataforma y rubro es un filtro independiente. Tu
+        plan <span className="font-medium capitalize text-ink-300">{plan?.plan_slug ?? "free"}</span>{" "}
+        permite hasta {plan?.max_sectors ?? 1} filtro(s) y {plan?.max_keywords ?? 5} palabras
+        clave por filtro.
       </p>
 
       <div className="mt-8">
         {rows.length > 0 && (
-          <div className="mb-6 divide-y divide-ink-800 border border-ink-800">
+          <div className="panel mb-6 divide-y divide-ink-800 rounded-3xl">
             {rows.map((r) => (
               <FilterRow key={r.id} row={r} />
             ))}

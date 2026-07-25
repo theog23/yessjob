@@ -1,10 +1,18 @@
-export function Logo({ className = "" }: { className?: string }) {
+export function Logo({
+  className = "",
+  size = "base",
+}: {
+  className?: string;
+  size?: "base" | "lg";
+}) {
   return (
-    <span className={`font-mono text-sm tracking-tight ${className}`}>
-      <span className="text-ink-600">[</span>
-      <span className="text-ink-0">yess</span>
-      <span className="text-ink-500">job</span>
-      <span className="text-ink-600">]</span>
+    <span
+      className={`font-serif font-semibold leading-none ${
+        size === "lg" ? "text-4xl md:text-5xl" : "text-xl"
+      } ${className}`}
+    >
+      <span className="brand-yess">yess</span>
+      <span className="brand-job">job</span>
     </span>
   );
 }

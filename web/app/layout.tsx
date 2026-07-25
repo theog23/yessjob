@@ -1,29 +1,31 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Fraunces, Inter } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const display = Fraunces({
+  variable: "--font-display",
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  style: ["normal", "italic"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const body = Inter({
+  variable: "--font-body",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "yessjob — proyectos freelance, filtrados y entregados",
+  title: "yessjob — encontrá el proyecto antes que nadie",
   description:
-    "Monitoreo automatico de Workana y Freelancer por sector. Notificaciones directas a Telegram.",
+    "yessjob vigila las oportunidades freelance de tu rubro y te avisa apenas aparecen, para que llegues primero.",
 };
 
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="es" className="dark">
-      <body className={`${geistSans.variable} ${geistMono.variable} font-sans`}>
+    <html lang="es">
+      <body className={`${display.variable} ${body.variable} font-sans`}>
         {children}
       </body>
     </html>

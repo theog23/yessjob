@@ -32,7 +32,7 @@ export function AddFilterForm({ sectors }: { sectors: Sector[] }) {
       action={async (fd) => {
         await formAction(fd);
       }}
-      className="panel space-y-5 p-6"
+      className="panel space-y-5 rounded-3xl p-6"
     >
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
@@ -95,7 +95,7 @@ export function AddFilterForm({ sectors }: { sectors: Sector[] }) {
       </div>
 
       {state.error && (
-        <p className="border border-ink-700 bg-ink-900 px-4 py-3 text-sm text-ink-200">
+        <p className="rounded-2xl border border-ink-700 bg-ink-900 px-4 py-3 text-sm text-ink-300">
           {state.error}
         </p>
       )}
