@@ -88,4 +88,24 @@
   .blob {
     @apply pointer-events-none absolute rounded-full blur-3xl;
   }
+
+  /* --- Cinta de texto en movimiento (landing) --- */
+  .marquee-track {
+    animation: marquee 26s linear infinite;
+  }
+
+  /* --- Etiqueta vertical tipo lomo de revista (landing) --- */
+  .vertical-label {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
 }
