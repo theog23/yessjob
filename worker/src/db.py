@@ -137,6 +137,14 @@ def get_user_by_chat_id(chat_id: int) -> str | None:
     return r.data[0]["user_id"] if r.data else None
 
 
+def unlink_telegram(user_id: str) -> None:
+    sb().table("telegram_links").delete().eq("user_id", user_id).execute()
+
+
+def unlink_telegram_by_chat(chat_id: int) -> None:
+    sb().table("telegram_links").delete().eq("chat_id", chat_id).execute()
+
+
 # --------------------------------------------------------
 #  Cuotas
 # --------------------------------------------------------

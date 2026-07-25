@@ -82,9 +82,7 @@ async def cmd_status(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def cmd_unlink(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> None:
-    from src.db import sb
-    chat_id = update.effective_chat.id
-    sb().table("telegram_links").delete().eq("chat_id", chat_id).execute()
+    db.unlink_telegram_by_chat(update.effective_chat.id)
     await update.message.reply_text("Chat desvinculado. Puedes volver a vincularlo desde la app.")
 
 

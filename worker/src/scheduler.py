@@ -8,6 +8,17 @@ Cada ciclo:
 4. Para cada usuario y cada job del grupo, aplica filtros (keywords,
    excluded, min_budget) y si matchea y no fue notificado antes, envia
    por Telegram y registra notification_sent.
+
+Manejo de fallos:
+- Scraping: cada scraper devuelve (jobs, tuvo_error). Se trackea cuantos
+  ciclos consecutivos fallo cada grupo (platform, categoria/skills) para
+  advertir si hay un bloqueo o cambio de contrato sostenido, sin frenar
+  el resto del sistema.
+- Notificacion: send_job() distingue error permanente (bot bloqueado,
+  chat invalido) de transitorio. Ante error permanente se desvincula al
+  usuario automaticamente. Ante fallos transitorios repetidos para el
+  mismo chat (>= _CHAT_FAILURE_LIMIT seguidos) se trata igual que un
+  error permanente, para no reintentar por siempre un chat roto.
 """
 import asyncio
 import logging
@@ -16,11 +27,18 @@ from collections import defaultdict
 from telegram import Bot
 
 from src import db
+from src.matching import matches_filter
 from src.scrapers import workana, freelancer
 from src.translator import translate_job
-from src.notifier import send_job
+from src.notifier import send_job, SendResult
 
 logger = logging.getLogger(__name__)
+
+_CONSECUTIVE_FAILURE_WARN_THRESHOLD = 5
+_CHAT_FAILURE_LIMIT = 5
+
+_group_failure_streak: dict[tuple, int] = {}
+_chat_failure_streak: dict[int, int] = {}
 
 
 def _group_targets(targets: list[dict]) -> dict[tuple, list[dict]]:
@@ -40,21 +58,63 @@ def _scrape_group(key: tuple) -> list[dict]:
     platform = key[0]
     try:
         if platform == "workana":
-            return workana.scrape(key[1])
-        if platform == "freelancer":
-            return freelancer.scrape(list(key[1]))
+            jobs, had_error = workana.scrape(key[1])
+        elif platform == "freelancer":
+            jobs, had_error = freelancer.scrape(list(key[1]))
+        else:
+            return []
     except Exception as e:
-        logger.exception("Scraper %s fallo: %s", platform, e)
-    return []
+        logger.exception("Scraper %s fallo inesperado: %s", platform, e)
+        jobs, had_error = [], True
+
+    if had_error:
+        streak = _group_failure_streak.get(key, 0) + 1
+        _group_failure_streak[key] = streak
+        if streak >= _CONSECUTIVE_FAILURE_WARN_THRESHOLD:
+            logger.error(
+                "%s lleva %d ciclos consecutivos fallando — posible bloqueo o "
+                "cambio de contrato del endpoint (grupo=%s)",
+                platform, streak, key,
+            )
+    else:
+        _group_failure_streak[key] = 0
+
+    return jobs
 
 
-def _job_matches(platform: str, job: dict, target: dict) -> bool:
+def _job_matches(job: dict, target: dict) -> bool:
     keywords = target.get("keywords") or []
     excluded = target.get("excluded_keywords") or []
     min_budget = float(target.get("min_budget_usd") or 0)
-    if platform == "workana":
-        return workana.matches_filter(job, keywords, excluded, min_budget)
-    return freelancer.matches_filter(job, keywords, excluded, min_budget)
+    return matches_filter(job, keywords, excluded, min_budget)
+
+
+async def _handle_send_result(result: SendResult, user_id: str, chat_id: int, job_id: str, platform: str) -> None:
+    if result == SendResult.OK:
+        _chat_failure_streak[chat_id] = 0
+        db.mark_notified(user_id, job_id)
+        db.log_usage(user_id, "notification_sent", {"platform": platform, "job_id": job_id})
+        await asyncio.sleep(0.4)   # rate-limit basico
+        return
+
+    if result == SendResult.PERMANENT_ERROR:
+        db.mark_notified(user_id, job_id)   # no reintentar este job
+        db.unlink_telegram(user_id)
+        _chat_failure_streak.pop(chat_id, None)
+        return
+
+    # TRANSIENT_ERROR: no se marca notified, se reintenta el proximo ciclo,
+    # pero si el mismo chat falla muchas veces seguidas dejamos de insistir.
+    streak = _chat_failure_streak.get(chat_id, 0) + 1
+    _chat_failure_streak[chat_id] = streak
+    if streak >= _CHAT_FAILURE_LIMIT:
+        logger.error(
+            "Chat %s fallo %d veces seguidas (transitorio) — se desvincula para "
+            "no reintentar indefinidamente", chat_id, streak,
+        )
+        db.mark_notified(user_id, job_id)
+        db.unlink_telegram(user_id)
+        _chat_failure_streak.pop(chat_id, None)
 
 
 async def run_cycle(bot: Bot) -> None:
@@ -80,16 +140,12 @@ async def run_cycle(bot: Bot) -> None:
                 job = translate_job(job)
 
             for t in group_targets:
-                if not _job_matches(key[0], job, t):
+                if not _job_matches(job, t):
                     continue
                 if db.was_notified(t["user_id"], job_id):
                     continue
-                ok = await send_job(bot, t["chat_id"], job, job_id)
-                if ok:
-                    db.mark_notified(t["user_id"], job_id)
-                    db.log_usage(t["user_id"], "notification_sent",
-                                 {"platform": key[0], "job_id": job_id})
-                    await asyncio.sleep(0.4)   # rate-limit basico
+                result = await send_job(bot, t["chat_id"], job, job_id)
+                await _handle_send_result(result, t["user_id"], t["chat_id"], job_id, key[0])
 
 
 async def loop_forever(bot: Bot, interval_seconds: int) -> None:
