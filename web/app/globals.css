@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-ink-800;
+  }
+  html {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-ink-950 text-ink-50 antialiased;
+  }
+  ::selection {
+    @apply bg-ink-0 text-ink-950;
+  }
+}
+
+@layer components {
+  .label-eyebrow {
+    @apply font-mono text-[11px] uppercase tracking-widest2 text-ink-500;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 bg-ink-0 px-5 py-3 text-sm font-medium text-ink-950 transition-colors hover:bg-ink-200 disabled:cursor-not-allowed disabled:opacity-40;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 border border-ink-700 bg-transparent px-5 py-3 text-sm font-medium text-ink-50 transition-colors hover:border-ink-0 disabled:cursor-not-allowed disabled:opacity-40;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-sm text-ink-400 transition-colors hover:text-ink-0;
+  }
+
+  .field-input {
+    @apply w-full border border-ink-700 bg-ink-900 px-4 py-3 text-sm text-ink-50 outline-none transition-colors placeholder:text-ink-600 focus:border-ink-0;
+  }
+
+  .panel {
+    @apply border border-ink-800 bg-ink-900/60;
+  }
+
+  .status-dot {
+    @apply inline-block h-1.5 w-1.5 rounded-full;
+  }
+}
+
+@layer utilities {
+  .bg-grid {
+    background-image: linear-gradient(to right, #ffffff08 1px, transparent 1px),
+      linear-gradient(to bottom, #ffffff08 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+}
