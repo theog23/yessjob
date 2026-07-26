@@ -145,6 +145,26 @@ def unlink_telegram_by_chat(chat_id: int) -> None:
     sb().table("telegram_links").delete().eq("chat_id", chat_id).execute()
 
 
+def get_last_activity(user_id: str) -> datetime | None:
+    r = (
+        sb().table("telegram_links")
+        .select("last_activity_at")
+        .eq("user_id", user_id)
+        .limit(1)
+        .execute()
+    )
+    if not r.data:
+        return None
+    raw = r.data[0]["last_activity_at"]
+    return datetime.fromisoformat(raw.replace("Z", "+00:00"))
+
+
+def touch_activity(user_id: str) -> None:
+    sb().table("telegram_links").update(
+        {"last_activity_at": datetime.now(timezone.utc).isoformat()}
+    ).eq("user_id", user_id).execute()
+
+
 # --------------------------------------------------------
 #  Cuotas
 # --------------------------------------------------------

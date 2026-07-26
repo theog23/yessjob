@@ -19,10 +19,16 @@ Manejo de fallos:
   usuario automaticamente. Ante fallos transitorios repetidos para el
   mismo chat (>= _CHAT_FAILURE_LIMIT seguidos) se trata igual que un
   error permanente, para no reintentar por siempre un chat roto.
+
+Heartbeat: al final de cada ciclo, si paso mas de HEARTBEAT_INTERVAL desde
+la ultima notificacion real (o heartbeat) de un chat, se manda un aviso de
+"sin novedades" — asi el usuario sabe que el sistema sigue vivo aunque no
+haya matches.
 """
 import asyncio
 import logging
 from collections import defaultdict
+from datetime import datetime, timedelta, timezone
 
 from telegram import Bot
 
@@ -30,12 +36,13 @@ from src import db
 from src.matching import matches_filter
 from src.scrapers import workana, freelancer
 from src.translator import translate_job
-from src.notifier import send_job, SendResult
+from src.notifier import send_heartbeat, send_job, SendResult
 
 logger = logging.getLogger(__name__)
 
 _CONSECUTIVE_FAILURE_WARN_THRESHOLD = 5
 _CHAT_FAILURE_LIMIT = 5
+HEARTBEAT_INTERVAL = timedelta(hours=1)
 
 _group_failure_streak: dict[tuple, int] = {}
 _chat_failure_streak: dict[int, int] = {}
@@ -94,6 +101,7 @@ async def _handle_send_result(result: SendResult, user_id: str, chat_id: int, jo
         _chat_failure_streak[chat_id] = 0
         db.mark_notified(user_id, job_id)
         db.log_usage(user_id, "notification_sent", {"platform": platform, "job_id": job_id})
+        db.touch_activity(user_id)   # resetea el reloj del heartbeat
         await asyncio.sleep(0.4)   # rate-limit basico
         return
 
@@ -115,6 +123,25 @@ async def _handle_send_result(result: SendResult, user_id: str, chat_id: int, jo
         db.mark_notified(user_id, job_id)
         db.unlink_telegram(user_id)
         _chat_failure_streak.pop(chat_id, None)
+
+
+async def _send_due_heartbeats(bot: Bot, targets: list[dict]) -> None:
+    # Un usuario puede aparecer varias veces en targets (una fila por
+    # filtro). Para el heartbeat alcanza con uno por chat.
+    chats: dict[int, str] = {t["chat_id"]: t["user_id"] for t in targets}
+    now = datetime.now(timezone.utc)
+
+    for chat_id, user_id in chats.items():
+        last_activity = db.get_last_activity(user_id)
+        if last_activity is None or now - last_activity < HEARTBEAT_INTERVAL:
+            continue
+
+        result = await send_heartbeat(bot, chat_id)
+        if result == SendResult.OK:
+            db.touch_activity(user_id)
+        elif result == SendResult.PERMANENT_ERROR:
+            db.unlink_telegram(user_id)
+        # TRANSIENT_ERROR: no se toca nada, se reintenta el proximo ciclo.
 
 
 async def run_cycle(bot: Bot) -> None:
@@ -146,6 +173,8 @@ async def run_cycle(bot: Bot) -> None:
                     continue
                 result = await send_job(bot, t["chat_id"], job, job_id)
                 await _handle_send_result(result, t["user_id"], t["chat_id"], job_id, key[0])
+
+    await _send_due_heartbeats(bot, targets)
 
 
 async def loop_forever(bot: Bot, interval_seconds: int) -> None:

@@ -1,14 +1,19 @@
 """
-Formatea y envia notificaciones de jobs a cada usuario en Telegram.
+Formatea y envia notificaciones de jobs (y heartbeats de "sin novedades")
+a cada usuario en Telegram.
 """
 import logging
 from enum import Enum
-from typing import Any
 
 from telegram import Bot, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.error import BadRequest, Forbidden, TelegramError
 
 logger = logging.getLogger(__name__)
+
+HEARTBEAT_TEXT = (
+    "Sin novedades en la ultima hora — seguimos vigilando tus filtros. "
+    "Te aviso apenas aparezca algo nuevo."
+)
 
 
 class SendResult(Enum):
@@ -68,12 +73,12 @@ def build_keyboard(job_id: str, url: str) -> InlineKeyboardMarkup:
 _PERMANENT_BAD_REQUEST_MARKERS = ("chat not found", "user is deactivated", "peer_id_invalid")
 
 
-async def send_job(bot: Bot, chat_id: int, job: dict, job_id: str) -> SendResult:
+async def _send(bot: Bot, chat_id: int, text: str, reply_markup: InlineKeyboardMarkup | None = None) -> SendResult:
     try:
         await bot.send_message(
             chat_id=chat_id,
-            text=format_job(job),
-            reply_markup=build_keyboard(job_id, job.get("url", "")),
+            text=text,
+            reply_markup=reply_markup,
             disable_web_page_preview=True,
         )
         return SendResult.OK
@@ -93,10 +98,9 @@ async def send_job(bot: Bot, chat_id: int, job: dict, job_id: str) -> SendResult
         return SendResult.TRANSIENT_ERROR
 
 
-async def send_text(bot: Bot, chat_id: int, text: str, **kwargs: Any) -> bool:
-    try:
-        await bot.send_message(chat_id=chat_id, text=text, **kwargs)
-        return True
-    except TelegramError as e:
-        logger.error("Telegram send_text fallo chat=%s: %s", chat_id, e)
-        return False
+async def send_job(bot: Bot, chat_id: int, job: dict, job_id: str) -> SendResult:
+    return await _send(bot, chat_id, format_job(job), build_keyboard(job_id, job.get("url", "")))
+
+
+async def send_heartbeat(bot: Bot, chat_id: int) -> SendResult:
+    return await _send(bot, chat_id, HEARTBEAT_TEXT)
