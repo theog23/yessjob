@@ -123,9 +123,12 @@ async def cb_propose(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> None:
 
     thinking = await query.message.reply_text("Claude esta redactando la propuesta...")
 
+    profile_row = db.get_profile(user_id)
+    proposal_style = profile_row.get("proposal_style") if profile_row else None
+
     import asyncio
     loop = asyncio.get_event_loop()
-    text = await loop.run_in_executor(None, generate_proposal, job)
+    text = await loop.run_in_executor(None, generate_proposal, job, "", proposal_style)
 
     try:
         await thinking.delete()

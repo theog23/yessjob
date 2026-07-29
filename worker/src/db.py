@@ -165,6 +165,17 @@ def touch_activity(user_id: str) -> None:
     ).eq("user_id", user_id).execute()
 
 
+def get_profile(user_id: str) -> dict | None:
+    r = (
+        sb().table("profiles")
+        .select("full_name, proposal_style")
+        .eq("id", user_id)
+        .limit(1)
+        .execute()
+    )
+    return r.data[0] if r.data else None
+
+
 # --------------------------------------------------------
 #  Cuotas
 # --------------------------------------------------------

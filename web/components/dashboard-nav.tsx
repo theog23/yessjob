@@ -7,6 +7,7 @@ const links = [
   { href: "/dashboard", label: "Resumen", exact: true },
   { href: "/dashboard/platforms", label: "Plataformas" },
   { href: "/dashboard/telegram", label: "Telegram" },
+  { href: "/dashboard/profile", label: "Perfil" },
   { href: "/dashboard/subscription", label: "Suscripcion" },
 ];
 
