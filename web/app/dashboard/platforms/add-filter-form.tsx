@@ -64,6 +64,7 @@ export function AddFilterForm({ sectors }: { sectors: Sector[] }) {
             </option>
             <option value="workana">Workana</option>
             <option value="freelancer">Freelancer.com</option>
+            <option value="upwork">Upwork</option>
           </select>
         </div>
         <div>

@@ -1,4 +1,4 @@
-export type Platform = "workana" | "freelancer";
+export type Platform = "workana" | "freelancer" | "upwork";
 
 export type Plan = {
   id: string;

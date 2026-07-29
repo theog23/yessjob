@@ -34,7 +34,7 @@ from telegram import Bot
 
 from src import db
 from src.matching import matches_filter
-from src.scrapers import workana, freelancer
+from src.scrapers import workana, freelancer, upwork
 from src.translator import translate_job
 from src.notifier import send_heartbeat, send_job, SendResult
 
@@ -54,9 +54,14 @@ def _group_targets(targets: list[dict]) -> dict[tuple, list[dict]]:
         platform = t["platform"]
         if platform == "workana":
             key = ("workana", t.get("workana_category") or "it-programming")
-        else:
+        elif platform == "freelancer":
             skills = tuple(sorted(t.get("freelancer_skill_ids") or []))
             key = ("freelancer", skills)
+        else:
+            # Upwork no soporta filtro de categoria/skill en su busqueda
+            # publica: todos los usuarios de Upwork comparten un unico
+            # scrape por ciclo, sin importar el sector que hayan elegido.
+            key = ("upwork", "all")
         groups[key].append(t)
     return groups
 
@@ -68,6 +73,8 @@ def _scrape_group(key: tuple) -> list[dict]:
             jobs, had_error = workana.scrape(key[1])
         elif platform == "freelancer":
             jobs, had_error = freelancer.scrape(list(key[1]))
+        elif platform == "upwork":
+            jobs, had_error = upwork.scrape()
         else:
             return []
     except Exception as e:
@@ -163,7 +170,7 @@ async def run_cycle(bot: Bot) -> None:
             if not job_id:
                 continue
 
-            if key[0] == "freelancer":
+            if key[0] in ("freelancer", "upwork"):
                 job = translate_job(job)
 
             for t in group_targets:

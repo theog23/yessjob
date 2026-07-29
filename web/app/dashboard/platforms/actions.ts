@@ -58,7 +58,7 @@ export async function previewMatches(formData: FormData): Promise<PreviewState> 
   if (!user) return { jobs: [], error: "Sesion invalida." };
 
   const platform = String(formData.get("platform") ?? "");
-  if (platform !== "workana" && platform !== "freelancer") {
+  if (platform !== "workana" && platform !== "freelancer" && platform !== "upwork") {
     return { jobs: [], error: null };
   }
 
