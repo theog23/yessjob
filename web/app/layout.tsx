@@ -15,7 +15,7 @@ const body = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "yessjob — encontrá el proyecto antes que nadie",
+  title: "yessjob: encuentra el proyecto antes que nadie",
   description:
     "yessjob vigila las oportunidades freelance de tu rubro y te avisa apenas aparecen, para que llegues primero.",
 };

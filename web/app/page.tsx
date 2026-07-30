@@ -65,10 +65,10 @@ function Header() {
 
 function Hero() {
   return (
-    <section className="relative flex min-h-[92vh] flex-col justify-center px-6 md:px-10">
+    <section className="relative flex min-h-[85vh] flex-col justify-center px-6 py-20 md:min-h-[92vh] md:px-10 md:py-0">
       <Reveal>
         <h1
-          className={`${archivo.className} relative mx-auto max-w-5xl text-balance text-center text-[15vw] font-[800] leading-[0.92] tracking-[-0.03em] text-ink-0 md:text-[7rem]`}
+          className={`${archivo.className} relative mx-auto max-w-5xl text-balance text-center text-[clamp(2rem,10.8vw,3rem)] font-[800] leading-[1.15] tracking-[-0.03em] text-ink-0 md:text-[7rem] md:leading-[0.92]`}
         >
           <span className="block">Nunca dejamos</span>
           <span className="block">de buscar.</span>
@@ -80,13 +80,13 @@ function Hero() {
       </Reveal>
 
       <Reveal delay={150}>
-        <div className="mx-auto mt-10 flex max-w-2xl items-end justify-between gap-6 text-left">
+        <div className="mx-auto mt-10 flex max-w-2xl flex-col items-start gap-3 text-left sm:flex-row sm:items-end sm:justify-between sm:gap-6">
           <p className="text-xs text-ink-500">
             ©{new Date().getFullYear()}
             <br />
             yessjob
           </p>
-          <p className="text-right text-xs text-ink-500">
+          <p className="text-left text-xs text-ink-500 sm:text-right">
             /MONITOREANDO
             <br />
             DESDE HOY
@@ -111,15 +111,15 @@ function Explainer() {
           <Reveal delay={80}>
             <p className="text-balance text-xl font-medium leading-snug text-ink-0 md:text-2xl">
               yessjob es un servicio que vigila Workana, Freelancer y Upwork
-              por vos, todo el dia, y te avisa por Telegram apenas aparece
+              por ti, todo el dia, y avisa por Telegram apenas aparece
               un proyecto de tu rubro.
             </p>
           </Reveal>
           <Reveal delay={160}>
             <p className="text-balance text-base leading-relaxed text-ink-500 md:text-lg">
-              No hace falta que entres a revisar cada plataforma varias
-              veces al dia. Elegis una vez tu rubro, tus plataformas y las
-              palabras clave que te interesan — nosotros nos encargamos de
+              No hace falta entrar a revisar cada plataforma varias
+              veces al dia. Eliges una vez tu rubro, tus plataformas y las
+              palabras clave que te interesan, y nosotros nos encargamos de
               mirar constantemente y avisarte al instante, para que seas de
               los primeros en responder.
             </p>
@@ -135,7 +135,7 @@ function ScrollStatement() {
     <section className="px-6 py-24 md:px-10 md:py-36">
       <div className="mx-auto max-w-4xl">
         <ScrollWords
-          text="Buscamos tu proyecto ideal cada minuto, cada segundo, sin descanso, para que vos solo tengas que decidir si te interesa."
+          text="Buscamos tu proyecto ideal cada minuto, cada segundo, sin descanso, para que tu solo tengas que decidir si te interesa."
           className={`${archivo.className} text-balance text-3xl font-[800] leading-tight tracking-tight md:text-5xl`}
         />
       </div>
@@ -169,17 +169,17 @@ function HowItWorks() {
     {
       n: "01",
       title: "Conecta tu Telegram",
-      body: "Vinculas tu cuenta en un clic. A partir de ahi, todo pasa ahi — sin entrar a ninguna plataforma a revisar manualmente.",
+      body: "Vinculas tu cuenta en un clic. A partir de ahi, todo pasa alli, sin entrar a ninguna plataforma a revisar manualmente.",
     },
     {
       n: "02",
-      title: "Elegi que buscas",
-      body: "Seleccionas tu rubro, tus plataformas y las palabras clave que te interesan. Vos decidis los filtros, nosotros los aplicamos siempre.",
+      title: "Elige que buscas",
+      body: "Seleccionas tu rubro, tus plataformas y las palabras clave que te interesan. Tu decides los filtros, nosotros los aplicamos siempre.",
     },
     {
       n: "03",
-      title: "Recibi el aviso al instante",
-      body: "Apenas aparece un proyecto que coincide, te llega la notificacion con todo lo que necesitas para decidir — antes que la mayoria lo vea.",
+      title: "Recibe el aviso al instante",
+      body: "Apenas aparece un proyecto que coincide, te llega la notificacion con todo lo que necesitas para decidir, antes que la mayoria lo vea.",
     },
   ];
 
@@ -228,69 +228,50 @@ function Plans({ plans }: { plans: Plan[] }) {
         <Reveal>
           <p className="label-eyebrow mb-4">Planes</p>
           <h2 className={`${archivo.className} text-balance text-3xl font-[800] tracking-tight text-ink-0 md:text-4xl`}>
-            Empeza gratis. Escala cuando lo necesites.
+            Empieza gratis. Escala cuando lo necesites.
           </h2>
         </Reveal>
 
-        <Reveal delay={100}>
-          <div className="mt-12 overflow-x-auto">
-            <div className="min-w-[640px]">
-              <div
-                className="grid border-b border-ink-800 pb-6"
-                style={{ gridTemplateColumns: "1.4fr repeat(3, 1fr)" }}
-              >
-                <div />
-                {plans.map((p, i) => (
-                  <div key={p.id} className={`px-4 ${i === 1 ? "-my-4 rounded-2xl bg-ink-0 py-4" : ""}`}>
-                    <p className={`label-eyebrow ${i === 1 ? "!text-ink-600" : ""}`}>{p.name}</p>
-                    <p
-                      className={`${archivo.className} mt-2 text-2xl font-[800] ${i === 1 ? "text-ink-950" : "text-ink-0"}`}
-                    >
-                      {p.price_usd === 0 ? "Gratis" : `$${p.price_usd}`}
-                      {p.price_usd > 0 && <span className="text-sm font-normal opacity-50">/mes</span>}
-                    </p>
-                  </div>
-                ))}
-              </div>
-
-              {rows.map((row) => (
+        <div className="mt-12 grid gap-5 md:grid-cols-3">
+          {plans.map((p, i) => {
+            const featured = i === 1;
+            return (
+              <Reveal key={p.id} delay={100 + i * 80}>
                 <div
-                  key={row.label}
-                  className="grid items-center border-b border-ink-800 py-4"
-                  style={{ gridTemplateColumns: "1.4fr repeat(3, 1fr)" }}
+                  className={`flex h-full flex-col rounded-3xl border p-7 ${
+                    featured ? "border-ink-0 bg-ink-0 text-ink-950" : "border-ink-800 text-ink-0"
+                  }`}
                 >
-                  <p className="text-sm text-ink-500">{row.label}</p>
-                  {plans.map((p, i) => (
-                    <p
-                      key={p.id}
-                      className={`px-4 text-sm ${i === 1 ? "rounded-lg bg-ink-0 py-1 font-medium text-ink-950" : "text-ink-0"}`}
-                    >
-                      {row.get(p)}
-                    </p>
-                  ))}
-                </div>
-              ))}
+                  <p className={`label-eyebrow ${featured ? "!text-ink-600" : ""}`}>{p.name}</p>
+                  <p className={`${archivo.className} mt-3 text-3xl font-[800]`}>
+                    {p.price_usd === 0 ? "Gratis" : `$${p.price_usd}`}
+                    {p.price_usd > 0 && <span className="text-sm font-normal opacity-50">/mes</span>}
+                  </p>
 
-              <div className="grid pt-6" style={{ gridTemplateColumns: "1.4fr repeat(3, 1fr)" }}>
-                <div />
-                {plans.map((p, i) => (
-                  <div key={p.id} className={`px-4 ${i === 1 ? "-mt-1 rounded-b-2xl bg-ink-0 pb-5" : ""}`}>
-                    <Link
-                      href="/register"
-                      className={
-                        i === 1
-                          ? "inline-flex w-full items-center justify-center rounded-full border border-ink-950 px-6 py-3 text-sm font-medium text-ink-950 transition-colors hover:bg-ink-950 hover:text-ink-0"
-                          : "btn-secondary w-full"
-                      }
-                    >
-                      Empezar
-                    </Link>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </Reveal>
+                  <ul className={`mt-7 flex-1 space-y-3 border-t pt-6 text-sm ${featured ? "border-ink-300" : "border-ink-800"}`}>
+                    {rows.map((row) => (
+                      <li key={row.label} className="flex items-center justify-between gap-4">
+                        <span className={featured ? "text-ink-600" : "text-ink-500"}>{row.label}</span>
+                        <span className="font-medium">{row.get(p)}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Link
+                    href="/register"
+                    className={
+                      featured
+                        ? "mt-7 inline-flex w-full items-center justify-center rounded-full bg-ink-950 px-6 py-3 text-sm font-medium text-ink-0 transition-transform hover:scale-[1.02]"
+                        : "btn-secondary mt-7 w-full"
+                    }
+                  >
+                    Empezar
+                  </Link>
+                </div>
+              </Reveal>
+            );
+          })}
+        </div>
       </div>
     </section>
   );
@@ -303,7 +284,7 @@ function FinalCta() {
         <h2
           className={`${archivo.className} mx-auto max-w-2xl text-balance text-4xl font-[900] tracking-tight text-ink-0 md:text-6xl`}
         >
-          Deja de buscar. Empeza a recibir.
+          Deja de buscar. Empieza a recibir.
         </h2>
       </Reveal>
       <Reveal delay={100}>
