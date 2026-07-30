@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Archivo } from "next/font/google";
 import { Logo } from "@/components/logo";
 import { Reveal } from "@/components/reveal";
+import { ScrollWords } from "@/components/scroll-words";
 import { createClient } from "@/lib/supabase/server";
 import type { Plan } from "@/lib/types";
 
@@ -22,6 +23,7 @@ export default async function LandingPage() {
     <main className="relative min-h-screen overflow-x-clip bg-ink-950">
       <Header />
       <Hero />
+      <ScrollStatement />
       <Marquee />
       <HowItWorks />
       <Plans plans={(plans as Plan[]) ?? []} />
@@ -33,11 +35,11 @@ export default async function LandingPage() {
 
 function Header() {
   return (
-    <header className="sticky top-4 z-50 mx-auto flex max-w-3xl items-center justify-between rounded-full bg-ink-0 px-5 py-3 text-ink-950 shadow-soft md:px-6">
+    <header className="sticky top-4 z-50 mx-auto flex max-w-lg items-center justify-between rounded-[20px] bg-ink-0 px-4 py-3 text-ink-950 shadow-soft">
       <Link href="/">
         <Logo />
       </Link>
-      <nav className="hidden items-center gap-6 md:flex">
+      <nav className="hidden items-center gap-5 md:flex">
         <a href="#como-funciona" className="text-sm text-ink-400 transition-colors hover:text-ink-950">
           Como funciona
         </a>
@@ -45,13 +47,13 @@ function Header() {
           Planes
         </a>
       </nav>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         <Link href="/login" className="hidden text-sm text-ink-400 transition-colors hover:text-ink-950 sm:block">
           Iniciar sesion
         </Link>
         <Link
           href="/register"
-          className="rounded-full bg-ink-950 px-4 py-2 text-sm font-medium text-ink-0 transition-transform hover:scale-[1.03]"
+          className="rounded-full bg-ink-950 px-4 py-2 text-xs font-medium text-ink-0 transition-transform hover:scale-[1.03]"
         >
           Crear cuenta
         </Link>
@@ -62,33 +64,40 @@ function Header() {
 
 function Hero() {
   return (
-    <section className="px-6 pb-20 pt-16 md:px-10 md:pb-28 md:pt-24">
-      <div className="mx-auto max-w-4xl text-center">
+    <section className="px-6 pb-16 pt-14 md:px-10 md:pb-24 md:pt-20">
+      <div className="mx-auto max-w-3xl text-center">
         <Reveal>
-          <p className="mb-6 inline-flex items-center gap-2 rounded-full border border-ink-800 px-4 py-1.5 text-xs text-ink-500">
+          <p className="mb-8 inline-flex items-center gap-2 rounded-full border border-ink-800 px-4 py-1.5 text-xs text-ink-500">
             <span className="status-dot animate-pulse bg-ink-0" />
             Monitoreo activo, ahora mismo
           </p>
         </Reveal>
 
         <Reveal delay={80}>
+          <div className="mx-auto mb-8 flex h-28 w-28 items-center justify-center rounded-3xl bg-ink-0 shadow-soft md:h-32 md:w-32">
+            <Logo size="lg" />
+          </div>
+        </Reveal>
+
+        <Reveal delay={140}>
           <h1
-            className={`${archivo.className} text-balance text-[13vw] font-[900] leading-[0.95] tracking-[-0.03em] text-ink-0 md:text-[5.2rem]`}
+            className={`${archivo.className} text-balance text-[11vw] font-[900] leading-[0.95] tracking-[-0.03em] text-ink-0 md:text-[4.4rem]`}
           >
-            Buscando tu proximo proyecto.
-            <br />
-            Cada minuto. Cada segundo.
+            Encontra tu proximo proyecto antes que nadie.
           </h1>
         </Reveal>
 
-        <Reveal delay={160}>
-          <p className="mx-auto mt-7 max-w-md text-balance text-base text-ink-500 md:text-lg">
-            Conecta tu Telegram, dinos que buscas, y nosotros vigilamos
-            Workana, Freelancer y Upwork por ti.
+        <Reveal delay={220}>
+          <p className="mx-auto mt-7 max-w-xl text-balance text-base leading-relaxed text-ink-500 md:text-lg">
+            yessjob vigila Workana, Freelancer y Upwork por vos, todo el
+            tiempo. Elegis tu rubro y tus plataformas, nosotros revisamos
+            cada proyecto nuevo que aparece, y te avisamos por Telegram
+            apenas encontramos uno que coincide con lo que buscas — antes
+            de que alguien mas lo vea.
           </p>
         </Reveal>
 
-        <Reveal delay={240}>
+        <Reveal delay={300}>
           <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
             <Link href="/register" className="btn-primary">
               Empezar gratis
@@ -98,6 +107,19 @@ function Hero() {
             </a>
           </div>
         </Reveal>
+      </div>
+    </section>
+  );
+}
+
+function ScrollStatement() {
+  return (
+    <section className="px-6 py-24 md:px-10 md:py-36">
+      <div className="mx-auto max-w-4xl">
+        <ScrollWords
+          text="Buscamos tu proyecto ideal cada minuto, cada segundo, sin descanso, para que vos solo tengas que decidir si te interesa."
+          className={`${archivo.className} text-balance text-3xl font-[800] leading-tight tracking-tight md:text-5xl`}
+        />
       </div>
     </section>
   );
@@ -129,17 +151,17 @@ function HowItWorks() {
     {
       n: "01",
       title: "Conecta tu Telegram",
-      body: "Un enlace, un clic. Asi de simple.",
+      body: "Vinculas tu cuenta en un clic. A partir de ahi, todo pasa ahi — sin entrar a ninguna plataforma a revisar manualmente.",
     },
     {
       n: "02",
-      title: "Dinos que buscas",
-      body: "Elegis tu rubro y tus plataformas.",
+      title: "Elegi que buscas",
+      body: "Seleccionas tu rubro, tus plataformas y las palabras clave que te interesan. Vos decidis los filtros, nosotros los aplicamos siempre.",
     },
     {
       n: "03",
-      title: "Recibi el aviso",
-      body: "Apenas aparece algo para ti, te llega al instante.",
+      title: "Recibi el aviso al instante",
+      body: "Apenas aparece un proyecto que coincide, te llega la notificacion con todo lo que necesitas para decidir — antes que la mayoria lo vea.",
     },
   ];
 
@@ -147,10 +169,11 @@ function HowItWorks() {
     <section id="como-funciona" className="px-6 py-20 md:px-10 md:py-28">
       <div className="mx-auto max-w-4xl">
         <Reveal>
+          <p className="label-eyebrow mb-4 text-center">Como funciona</p>
           <h2
             className={`${archivo.className} mx-auto max-w-lg text-balance text-center text-3xl font-[800] tracking-tight text-ink-0 md:text-4xl`}
           >
-            Vos decidis que buscar. Nosotros hacemos el resto.
+            Tres pasos. Despues, te olvidas del tema.
           </h2>
         </Reveal>
 
@@ -158,13 +181,11 @@ function HowItWorks() {
           {steps.map((s, i) => (
             <Reveal key={s.n} delay={i * 100}>
               <div className="h-full rounded-3xl bg-ink-900 p-7">
-                <span className={`${archivo.className} text-sm font-[700] text-ink-600`}>
-                  {s.n}
-                </span>
+                <span className={`${archivo.className} text-sm font-[700] text-ink-600`}>{s.n}</span>
                 <h3 className={`${archivo.className} mt-4 text-xl font-[700] tracking-tight text-ink-0`}>
                   {s.title}
                 </h3>
-                <p className="mt-2 text-sm leading-relaxed text-ink-500">{s.body}</p>
+                <p className="mt-3 text-sm leading-relaxed text-ink-500">{s.body}</p>
               </div>
             </Reveal>
           ))}
@@ -192,9 +213,8 @@ function Plans({ plans }: { plans: Plan[] }) {
     <section id="planes" className="px-6 py-20 md:px-10 md:py-28">
       <div className="mx-auto max-w-4xl">
         <Reveal>
-          <h2
-            className={`${archivo.className} text-balance text-3xl font-[800] tracking-tight text-ink-0 md:text-4xl`}
-          >
+          <p className="label-eyebrow mb-4">Planes</p>
+          <h2 className={`${archivo.className} text-balance text-3xl font-[800] tracking-tight text-ink-0 md:text-4xl`}>
             Empeza gratis. Escala cuando lo necesites.
           </h2>
         </Reveal>
