@@ -23,6 +23,7 @@ export default async function LandingPage() {
     <main className="relative min-h-screen overflow-x-clip bg-ink-950">
       <Header />
       <Hero />
+      <Explainer />
       <ScrollStatement />
       <Marquee />
       <HowItWorks />
@@ -64,49 +65,66 @@ function Header() {
 
 function Hero() {
   return (
-    <section className="px-6 pb-16 pt-14 md:px-10 md:pb-24 md:pt-20">
-      <div className="mx-auto max-w-3xl text-center">
-        <Reveal>
-          <p className="mb-8 inline-flex items-center gap-2 rounded-full border border-ink-800 px-4 py-1.5 text-xs text-ink-500">
-            <span className="status-dot animate-pulse bg-ink-0" />
-            Monitoreo activo, ahora mismo
-          </p>
-        </Reveal>
+    <section className="relative flex min-h-[92vh] flex-col justify-center px-6 md:px-10">
+      <Reveal>
+        <h1
+          className={`${archivo.className} relative mx-auto max-w-5xl text-balance text-center text-[15vw] font-[800] leading-[0.92] tracking-[-0.03em] text-ink-0 md:text-[7rem]`}
+        >
+          <span className="block">Nunca dejamos</span>
+          <span className="block">de buscar.</span>
 
-        <Reveal delay={80}>
-          <div className="mx-auto mb-8 flex h-28 w-28 items-center justify-center rounded-3xl bg-ink-0 shadow-soft md:h-32 md:w-32">
+          <span className="pointer-events-none absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center">
             <Logo size="lg" />
-          </div>
-        </Reveal>
+          </span>
+        </h1>
+      </Reveal>
 
-        <Reveal delay={140}>
-          <h1
-            className={`${archivo.className} text-balance text-[11vw] font-[900] leading-[0.95] tracking-[-0.03em] text-ink-0 md:text-[4.4rem]`}
-          >
-            Encontra tu proximo proyecto antes que nadie.
-          </h1>
-        </Reveal>
-
-        <Reveal delay={220}>
-          <p className="mx-auto mt-7 max-w-xl text-balance text-base leading-relaxed text-ink-500 md:text-lg">
-            yessjob vigila Workana, Freelancer y Upwork por vos, todo el
-            tiempo. Elegis tu rubro y tus plataformas, nosotros revisamos
-            cada proyecto nuevo que aparece, y te avisamos por Telegram
-            apenas encontramos uno que coincide con lo que buscas — antes
-            de que alguien mas lo vea.
+      <Reveal delay={150}>
+        <div className="mx-auto mt-10 flex max-w-2xl items-end justify-between gap-6 text-left">
+          <p className="text-xs text-ink-500">
+            ©{new Date().getFullYear()}
+            <br />
+            yessjob
           </p>
+          <p className="text-right text-xs text-ink-500">
+            /MONITOREANDO
+            <br />
+            DESDE HOY
+          </p>
+        </div>
+      </Reveal>
+    </section>
+  );
+}
+
+function Explainer() {
+  return (
+    <section id="que-es" className="min-h-[70vh] px-6 py-24 md:px-10 md:py-32">
+      <div className="mx-auto grid max-w-5xl gap-10 md:grid-cols-[300px_1fr] md:gap-16">
+        <Reveal>
+          <h2 className={`${archivo.className} text-6xl font-[700] tracking-tight text-ink-0 md:text-7xl`}>
+            Hola.
+          </h2>
         </Reveal>
 
-        <Reveal delay={300}>
-          <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
-            <Link href="/register" className="btn-primary">
-              Empezar gratis
-            </Link>
-            <a href="#como-funciona" className="btn-secondary">
-              Ver como funciona
-            </a>
-          </div>
-        </Reveal>
+        <div className="space-y-6">
+          <Reveal delay={80}>
+            <p className="text-balance text-xl font-medium leading-snug text-ink-0 md:text-2xl">
+              yessjob es un servicio que vigila Workana, Freelancer y Upwork
+              por vos, todo el dia, y te avisa por Telegram apenas aparece
+              un proyecto de tu rubro.
+            </p>
+          </Reveal>
+          <Reveal delay={160}>
+            <p className="text-balance text-base leading-relaxed text-ink-500 md:text-lg">
+              No hace falta que entres a revisar cada plataforma varias
+              veces al dia. Elegis una vez tu rubro, tus plataformas y las
+              palabras clave que te interesan — nosotros nos encargamos de
+              mirar constantemente y avisarte al instante, para que seas de
+              los primeros en responder.
+            </p>
+          </Reveal>
+        </div>
       </div>
     </section>
   );
@@ -169,23 +187,18 @@ function HowItWorks() {
     <section id="como-funciona" className="px-6 py-20 md:px-10 md:py-28">
       <div className="mx-auto max-w-4xl">
         <Reveal>
-          <p className="label-eyebrow mb-4 text-center">Como funciona</p>
-          <h2
-            className={`${archivo.className} mx-auto max-w-lg text-balance text-center text-3xl font-[800] tracking-tight text-ink-0 md:text-4xl`}
-          >
-            Tres pasos. Despues, te olvidas del tema.
-          </h2>
+          <p className="label-eyebrow mb-4">Como funciona</p>
         </Reveal>
 
-        <div className="mt-14 grid gap-4 md:grid-cols-3">
+        <div className="mt-4 divide-y divide-ink-800 border-t border-ink-800">
           {steps.map((s, i) => (
-            <Reveal key={s.n} delay={i * 100}>
-              <div className="h-full rounded-3xl bg-ink-900 p-7">
+            <Reveal key={s.n} delay={i * 80}>
+              <div className="grid gap-2 py-8 md:grid-cols-[80px_260px_1fr] md:items-baseline md:gap-8">
                 <span className={`${archivo.className} text-sm font-[700] text-ink-600`}>{s.n}</span>
-                <h3 className={`${archivo.className} mt-4 text-xl font-[700] tracking-tight text-ink-0`}>
+                <h3 className={`${archivo.className} text-2xl font-[700] tracking-tight text-ink-0`}>
                   {s.title}
                 </h3>
-                <p className="mt-3 text-sm leading-relaxed text-ink-500">{s.body}</p>
+                <p className="text-sm leading-relaxed text-ink-500 md:text-base">{s.body}</p>
               </div>
             </Reveal>
           ))}
@@ -220,7 +233,7 @@ function Plans({ plans }: { plans: Plan[] }) {
         </Reveal>
 
         <Reveal delay={100}>
-          <div className="mt-12 overflow-x-auto rounded-3xl bg-ink-900 p-6 md:p-8">
+          <div className="mt-12 overflow-x-auto">
             <div className="min-w-[640px]">
               <div
                 className="grid border-b border-ink-800 pb-6"
@@ -306,10 +319,15 @@ function FinalCta() {
 
 function Footer() {
   return (
-    <footer className="border-t border-ink-800 px-6 py-10 md:px-10">
-      <div className="mx-auto flex max-w-4xl flex-col items-center justify-between gap-4 sm:flex-row">
-        <Logo />
-        <p className="text-xs text-ink-500">© {new Date().getFullYear()} yessjob</p>
+    <footer className="border-t border-ink-800 px-6 py-16 md:px-10">
+      <div className="mx-auto max-w-4xl">
+        <h3 className={`${archivo.className} max-w-xl text-balance text-3xl font-[800] tracking-tight text-ink-0 md:text-4xl`}>
+          Encontrando proyectos, todo el tiempo.
+        </h3>
+        <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-ink-800 pt-6 sm:flex-row">
+          <Logo />
+          <p className="text-xs text-ink-500">© {new Date().getFullYear()} yessjob</p>
+        </div>
       </div>
     </footer>
   );
