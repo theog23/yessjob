@@ -1,6 +1,6 @@
 [build]
 builder = "RAILPACK"
-buildCommand = "python -m playwright install --with-deps chromium"
+buildCommand = "PLAYWRIGHT_BROWSERS_PATH=0 python -m playwright install --with-deps chromium"
 
 [deploy]
 startCommand = "python main.py"
