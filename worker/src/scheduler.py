@@ -43,9 +43,27 @@ logger = logging.getLogger(__name__)
 _CONSECUTIVE_FAILURE_WARN_THRESHOLD = 5
 _CHAT_FAILURE_LIMIT = 5
 HEARTBEAT_INTERVAL = timedelta(hours=1)
+_DEFAULT_INTERVAL_MIN = 60
 
 _group_failure_streak: dict[tuple, int] = {}
 _chat_failure_streak: dict[int, int] = {}
+_group_last_scraped: dict[tuple, datetime] = {}
+
+
+def _group_due(key: tuple, group_targets: list[dict], now: datetime) -> bool:
+    """
+    Un grupo solo se scrapea si paso su intervalo minimo (el mas exigente
+    entre los planes de sus usuarios). Antes se scrapeaba cada grupo en
+    cada tick del loop (60s) sin importar el plan — esto respeta la
+    frecuencia real prometida (Free=60min, Pro=15min, Premium=5min) y de
+    paso evita golpear plataformas externas mucho mas seguido de lo
+    necesario.
+    """
+    interval_min = min(
+        (t.get("min_scrape_interval") or _DEFAULT_INTERVAL_MIN) for t in group_targets
+    )
+    last = _group_last_scraped.get(key)
+    return last is None or now - last >= timedelta(minutes=interval_min)
 
 
 def _group_targets(targets: list[dict]) -> dict[tuple, list[dict]]:
@@ -159,8 +177,13 @@ async def run_cycle(bot: Bot) -> None:
 
     groups = _group_targets(targets)
     logger.info("Ciclo: %d targets en %d grupos", len(targets), len(groups))
+    now = datetime.now(timezone.utc)
 
     for key, group_targets in groups.items():
+        if not _group_due(key, group_targets, now):
+            continue
+        _group_last_scraped[key] = now
+
         jobs = _scrape_group(key)
         if not jobs:
             continue
