@@ -100,7 +100,7 @@ def _fetch_visitor_token() -> tuple[str | None, bool]:
     from curl_cffi import requests as curl_requests
 
     try:
-        r = curl_requests.get(HOMEPAGE_URL, impersonate="chrome", timeout=30)
+        r = curl_requests.get(HOMEPAGE_URL, impersonate="chrome146", timeout=30)
         r.raise_for_status()
         token = r.cookies.get("visitor_gql_token")
         if token:
@@ -167,7 +167,7 @@ def _fetch_jobs_page(token: str, offset: int, count: int) -> tuple[list[dict], b
     for attempt in range(MAX_RETRIES):
         try:
             r = curl_requests.post(
-                GRAPHQL_URL, headers=headers, json=payload, impersonate="chrome", timeout=30
+                GRAPHQL_URL, headers=headers, json=payload, impersonate="chrome146", timeout=30
             )
             if r.status_code == 401:
                 return [], True, False
