@@ -39,6 +39,7 @@ trae el feed general ordenado por "recency" y el filtrado real lo hacen
 las keywords del usuario (matches_filter), igual que con las otras
 plataformas.
 """
+import concurrent.futures
 import logging
 import time
 from datetime import datetime, timezone
@@ -106,6 +107,18 @@ _token_cache: dict[str, object] = {"token": None, "fetched_at": 0.0}
 
 
 def _fetch_visitor_token() -> tuple[str | None, bool]:
+    """Corre _fetch_visitor_token_sync en un hilo aparte.
+
+    El scheduler llama a esto desde dentro del loop de asyncio del
+    worker (donde tambien corre el bot de Telegram) -- Playwright Sync
+    API no permite usarse dentro de un loop de asyncio ya corriendo, asi
+    que se ejecuta en un hilo propio sin loop, que es donde si funciona.
+    """
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+        return executor.submit(_fetch_visitor_token_sync).result()
+
+
+def _fetch_visitor_token_sync() -> tuple[str | None, bool]:
     """Abre la homepage en un navegador headless real (Playwright +
     stealth) y espera a que resuelva solo el challenge de Cloudflare
     (si aparece) para sacar la cookie visitor_gql_token. Devuelve
