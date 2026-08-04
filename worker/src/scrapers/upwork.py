@@ -89,24 +89,27 @@ _token_cache: dict[str, object] = {"token": None, "fetched_at": 0.0}
 
 def _fetch_visitor_token() -> tuple[str | None, bool]:
     """Pega a la homepage como visitante anonimo (GET simple, sin login)
-    y saca la cookie visitor_gql_token. Devuelve (token, tuvo_error)."""
+    y saca la cookie visitor_gql_token. Devuelve (token, tuvo_error).
+
+    Un solo intento, sin reintento en rafaga: Upwork rate-limitea (429)
+    ante 2-3 requests seguidos en pocos segundos desde la misma IP, asi
+    que reintentar rapido ante un fallo empeora las cosas. El scheduler
+    ya solo llama a esto una vez por ciclo (cada 5-60min segun el plan),
+    asi que el proximo ciclo actua como reintento natural, bien espaciado.
+    """
     from curl_cffi import requests as curl_requests
 
-    last_error: Exception | None = None
-    for attempt in range(MAX_RETRIES):
-        try:
-            r = curl_requests.get(HOMEPAGE_URL, impersonate="chrome", timeout=30)
-            r.raise_for_status()
-            token = r.cookies.get("visitor_gql_token")
-            if token:
-                return token, False
-            last_error = RuntimeError("respuesta sin cookie visitor_gql_token")
-        except Exception as e:
-            last_error = e
-        if attempt < MAX_RETRIES - 1:
-            time.sleep(2 ** attempt)
+    try:
+        r = curl_requests.get(HOMEPAGE_URL, impersonate="chrome", timeout=30)
+        r.raise_for_status()
+        token = r.cookies.get("visitor_gql_token")
+        if token:
+            return token, False
+        error: Exception = RuntimeError("respuesta sin cookie visitor_gql_token")
+    except Exception as e:
+        error = e
 
-    logger.error("Upwork: fallo obteniendo token de visitante tras %d intentos: %s", MAX_RETRIES, last_error)
+    logger.error("Upwork: fallo obteniendo token de visitante: %s", error)
     return None, True
 
 
@@ -168,6 +171,11 @@ def _fetch_jobs_page(token: str, offset: int, count: int) -> tuple[list[dict], b
             )
             if r.status_code == 401:
                 return [], True, False
+            if r.status_code == 429:
+                # Rate limit: reintentar rapido lo empeora, cortamos ya
+                # mismo y dejamos que el proximo ciclo lo reintente.
+                logger.error("Upwork GraphQL: rate limited (429) en offset=%d", offset)
+                return [], False, True
             r.raise_for_status()
             data = r.json()
             if "errors" in data:
