@@ -14,11 +14,13 @@ CLAUDE_MODEL              = os.getenv("CLAUDE_MODEL", "claude-sonnet-4-6")
 
 FREELANCER_COOKIES        = os.getenv("FREELANCER_COOKIES", "").strip()
 
-SCRAPE_LOOP_SECONDS       = int(os.getenv("SCRAPE_LOOP_SECONDS", "60"))
+SCRAPE_LOOP_MIN_SECONDS   = int(os.getenv("SCRAPE_LOOP_MIN_SECONDS", "30"))
+SCRAPE_LOOP_MAX_SECONDS   = int(os.getenv("SCRAPE_LOOP_MAX_SECONDS", "90"))
 WORKANA_MAX_PAGES         = int(os.getenv("WORKANA_MAX_PAGES", "2"))
 FREELANCER_RESULTS        = int(os.getenv("FREELANCER_RESULTS_PER_RUN", "20"))
 
 APP_URL                   = os.getenv("APP_URL", "").rstrip("/")
+WARP_PROXY_URL            = os.getenv("WARP_PROXY_URL", "").strip()
 
 
 def validate() -> list[str]:

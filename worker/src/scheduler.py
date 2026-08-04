@@ -27,6 +27,7 @@ haya matches.
 """
 import asyncio
 import logging
+import random
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 
@@ -207,11 +208,19 @@ async def run_cycle(bot: Bot) -> None:
     await _send_due_heartbeats(bot, targets)
 
 
-async def loop_forever(bot: Bot, interval_seconds: int) -> None:
-    logger.info("Loop de scraping cada %ds", interval_seconds)
+async def loop_forever(bot: Bot, min_seconds: int, max_seconds: int) -> None:
+    """
+    Duerme un tiempo aleatorio entre min_seconds y max_seconds entre cada
+    chequeo (en vez de un intervalo fijo), para no dejar un patron de
+    trafico perfectamente regular. Esto es independiente del intervalo
+    real de scraping por grupo (_group_due), que sigue respetando el
+    plan de cada usuario -- esto solo afecta cada cuanto se hace el
+    chequeo de "a quien le toca ahora".
+    """
+    logger.info("Loop de scraping cada %d-%ds (aleatorio)", min_seconds, max_seconds)
     while True:
         try:
             await run_cycle(bot)
         except Exception as e:
             logger.exception("Error en ciclo: %s", e)
-        await asyncio.sleep(interval_seconds)
+        await asyncio.sleep(random.uniform(min_seconds, max_seconds))

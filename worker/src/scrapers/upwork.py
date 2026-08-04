@@ -8,12 +8,29 @@ como Bearer token contra su endpoint GraphQL interno
 (/api/graphql/v1) para buscar proyectos publicos — el mismo mecanismo
 que usa su propia pagina de busqueda.
 
-Validado en una PoC aislada (2026-07-26) con curl_cffi + impersonate
-Chrome, SIN proxy: 22/22 llamadas GraphQL exitosas y 7/8 obtenciones
-de token exitosas (la unica falla fue un timeout de red transitorio,
-no un bloqueo). No se detecto ningun desafio de Cloudflare con esta
-tecnica (a diferencia de pegarle directo a la pagina de busqueda
-/nx/jobs/search/, que si esta protegida).
+Historial: la version original (curl_cffi + impersonate Chrome, SIN
+proxy) se valido en una PoC aislada (2026-07-26) desde IP residencial,
+pero al desplegar en Railway el paso de obtener el token de visitante
+empezo a fallar siempre con 403. Se investigo a fondo (headers, ritmo
+de requests, builder de Railway, huellas de navegador, WARP, Psiphon,
+Supabase Edge Functions) y se confirmo con pruebas reales que Upwork
+exige DOS cosas a la vez para la homepage: huella TLS de navegador real
+Y buena reputacion de IP -- ninguna nube (Railway, WARP, Psiphon, Deno
+Deploy) pasa la parte de reputacion de IP con un cliente HTTP, por mas
+bien disfrazado que este.
+
+La solucion que si funciono en pruebas reales: usar un navegador headless
+de verdad (Playwright + playwright-stealth) en vez de un cliente HTTP
+para el paso de conseguir el token. Un navegador real ejecuta JavaScript
+de verdad y puede resolver el challenge de Cloudflare que aparece en la
+homepage cuando la IP no es de confianza (challenge que ningun cliente
+HTTP, sin importar la calidad del disfraz, puede resolver). Se prueba
+ruteado a traves de un proxy WARP (Cloudflare, gratis) via WARP_PROXY_URL
+-- sin eso, se conecta directo (funciona igual desde una IP residencial).
+
+Una vez conseguido el token, las llamadas GraphQL de busqueda siguen
+usando curl_cffi (liviano, sin navegador) por el mismo proxy, ya que el
+token queda atado a la IP que lo pidio.
 
 Diferencia clave con Workana/Freelancer: la busqueda publica de Upwork
 no acepta filtro de categoria/skill en el request, asi que no hay forma
@@ -21,20 +38,21 @@ de acotar el scraping por sector a nivel de la consulta de origen. Se
 trae el feed general ordenado por "recency" y el filtrado real lo hacen
 las keywords del usuario (matches_filter), igual que con las otras
 plataformas.
-
-IMPORTANTE: no se corrio scraping local sostenido a proposito, para no
-generar un patron de trafico repetido desde una IP residencial. La
-validacion de estabilidad en uso continuo se hace una vez desplegado
-en Railway, no en desarrollo local.
 """
 import logging
 import time
 from datetime import datetime, timezone
 
+from src.config import WARP_PROXY_URL
+
 logger = logging.getLogger(__name__)
 
 HOMEPAGE_URL = "https://www.upwork.com/"
 GRAPHQL_URL = "https://www.upwork.com/api/graphql/v1"
+BROWSER_USER_AGENT = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+)
 MAX_RETRIES = 3
 MAX_PAGES_PER_CYCLE = 3
 PAGE_SIZE = 25
@@ -88,28 +106,57 @@ _token_cache: dict[str, object] = {"token": None, "fetched_at": 0.0}
 
 
 def _fetch_visitor_token() -> tuple[str | None, bool]:
-    """Pega a la homepage como visitante anonimo (GET simple, sin login)
-    y saca la cookie visitor_gql_token. Devuelve (token, tuvo_error).
+    """Abre la homepage en un navegador headless real (Playwright +
+    stealth) y espera a que resuelva solo el challenge de Cloudflare
+    (si aparece) para sacar la cookie visitor_gql_token. Devuelve
+    (token, tuvo_error).
 
-    Un solo intento, sin reintento en rafaga: Upwork rate-limitea (429)
-    ante 2-3 requests seguidos en pocos segundos desde la misma IP, asi
-    que reintentar rapido ante un fallo empeora las cosas. El scheduler
-    ya solo llama a esto una vez por ciclo (cada 5-60min segun el plan),
-    asi que el proximo ciclo actua como reintento natural, bien espaciado.
+    Un cliente HTTP normal (incluso con huella TLS de Chrome via
+    curl_cffi) no puede pasar el challenge de Cloudflare cuando la IP
+    de origen no tiene buena reputacion, porque el challenge requiere
+    ejecutar JavaScript de verdad. Un solo intento por ciclo -- si
+    falla, el proximo ciclo reintenta espaciado.
     """
-    from curl_cffi import requests as curl_requests
+    from playwright.sync_api import sync_playwright
+    from playwright_stealth import Stealth
+
+    proxy = {"server": WARP_PROXY_URL} if WARP_PROXY_URL else None
 
     try:
-        r = curl_requests.get(HOMEPAGE_URL, impersonate="chrome146", timeout=30)
-        r.raise_for_status()
-        token = r.cookies.get("visitor_gql_token")
-        if token:
-            return token, False
-        error: Exception = RuntimeError("respuesta sin cookie visitor_gql_token")
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True, proxy=proxy)
+            try:
+                context = browser.new_context(
+                    user_agent=BROWSER_USER_AGENT,
+                    viewport={"width": 1280, "height": 800},
+                )
+                Stealth().apply_stealth_sync(context)
+                page = context.new_page()
+                page.goto(HOMEPAGE_URL, timeout=45000, wait_until="domcontentloaded")
+
+                # El challenge de Cloudflare (si aparece) se resuelve solo
+                # en unos segundos en un navegador real; se sondea la
+                # cookie en vez de esperar un tiempo fijo.
+                token = None
+                deadline = time.time() + 35
+                while time.time() < deadline:
+                    cookies = context.cookies()
+                    token = next(
+                        (c["value"] for c in cookies if c["name"] == "visitor_gql_token"), None
+                    )
+                    if token:
+                        break
+                    page.wait_for_timeout(2000)
+
+                if token:
+                    return token, False
+                error: Exception = RuntimeError("no aparecio la cookie visitor_gql_token")
+            finally:
+                browser.close()
     except Exception as e:
         error = e
 
-    logger.error("Upwork: fallo obteniendo token de visitante: %s", error)
+    logger.error("Upwork: fallo obteniendo token de visitante (navegador): %s", error)
     return None, True
 
 
@@ -140,6 +187,16 @@ def _invalidate_token() -> None:
     _token_cache["fetched_at"] = 0.0
 
 
+def _curl_proxies() -> dict[str, str] | None:
+    """WARP_PROXY_URL se guarda como socks5://host:port (formato que
+    espera Playwright). curl_cffi/libcurl en cambio quiere socks5h://
+    para resolver el DNS del lado del proxy, asi que se convierte aca."""
+    if not WARP_PROXY_URL:
+        return None
+    url = WARP_PROXY_URL.replace("socks5://", "socks5h://", 1)
+    return {"http": url, "https": url}
+
+
 def _fetch_jobs_page(token: str, offset: int, count: int) -> tuple[list[dict], bool, bool]:
     """Devuelve (resultados_crudos, token_invalido, tuvo_error_real)."""
     from curl_cffi import requests as curl_requests
@@ -167,7 +224,12 @@ def _fetch_jobs_page(token: str, offset: int, count: int) -> tuple[list[dict], b
     for attempt in range(MAX_RETRIES):
         try:
             r = curl_requests.post(
-                GRAPHQL_URL, headers=headers, json=payload, impersonate="chrome146", timeout=30
+                GRAPHQL_URL,
+                headers=headers,
+                json=payload,
+                impersonate="chrome146",
+                timeout=30,
+                proxies=_curl_proxies(),
             )
             if r.status_code == 401:
                 return [], True, False

@@ -10,7 +10,7 @@ import signal
 import sys
 
 from src.bot import build_application
-from src.config import SCRAPE_LOOP_SECONDS, validate
+from src.config import SCRAPE_LOOP_MIN_SECONDS, SCRAPE_LOOP_MAX_SECONDS, validate
 from src.scheduler import loop_forever
 
 logging.basicConfig(
@@ -36,7 +36,9 @@ async def main() -> None:
     await app.updater.start_polling(drop_pending_updates=True)
     logger.info("Bot de Telegram corriendo")
 
-    scrape_task = asyncio.create_task(loop_forever(app.bot, SCRAPE_LOOP_SECONDS))
+    scrape_task = asyncio.create_task(
+        loop_forever(app.bot, SCRAPE_LOOP_MIN_SECONDS, SCRAPE_LOOP_MAX_SECONDS)
+    )
     stop = asyncio.Event()
 
     def _shutdown(*_):
