@@ -280,8 +280,11 @@ def _normalize(item: dict) -> dict | None:
         return None
 
     description = (item.get("description") or "").strip()[:2000]
+    # cipherText ya viene con el "~" incluido (ej. "~022084852624338252639"),
+    # asi que no hay que agregar otro -- si no, el link queda con "~~" y
+    # Upwork responde "job not found".
     cipher = tile.get("ciphertext") or ""
-    url = f"https://www.upwork.com/jobs/~{cipher}" if cipher else ""
+    url = f"https://www.upwork.com/jobs/{cipher}" if cipher else ""
 
     job_type = str(tile.get("jobType") or "").upper()
     budget_str = "No especificado"
