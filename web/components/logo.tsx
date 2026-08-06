@@ -8,7 +8,7 @@ export function Logo({
   return (
     <span
       className={`font-serif font-semibold leading-none ${
-        size === "lg" ? "text-2xl sm:text-3xl md:text-5xl" : "text-xl"
+        size === "lg" ? "text-3xl sm:text-4xl md:text-6xl" : "text-xl"
       } ${className}`}
     >
       <span className="brand-yess">yess</span>
