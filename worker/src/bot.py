@@ -71,12 +71,18 @@ async def cmd_status(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> None:
         return
     plan = db.get_user_plan(user_id)
     if not plan:
-        await update.message.reply_text("Tu suscripcion no esta activa.")
+        await update.message.reply_text(
+            "Tu prueba gratuita vencio o tu cuenta no esta activa.\n"
+            "Agrega una tarjeta desde la app para reactivarla."
+        )
         return
+    balance = db.get_generation_balance(user_id) or {}
+    purchased = balance.get("purchased_remaining") or 0
+    extra = f" (+{purchased} compradas)" if purchased else ""
     await update.message.reply_text(
         f"Cuenta activa\n"
         f"Plan: {plan['plan_slug']}\n"
-        f"Propuestas hoy: {db.proposals_today(user_id)}/{plan['max_proposals_per_day']}\n"
+        f"Generaciones IA: {balance.get('base_used', '-')}/{balance.get('base_limit', plan['max_generations_per_month'])}{extra}\n"
         f"Intervalo minimo: {plan['min_scrape_interval_min']} min"
     )
 
@@ -98,15 +104,9 @@ async def cb_propose(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> None:
 
     plan = db.get_user_plan(user_id)
     if not plan:
-        await query.message.reply_text("Tu suscripcion no esta activa.")
-        return
-
-    used = db.proposals_today(user_id)
-    limit = plan["max_proposals_per_day"]
-    if used >= limit:
         await query.message.reply_text(
-            f"Alcanzaste el limite de propuestas de tu plan ({limit}/dia).\n"
-            f"Reintenta manana o mejora tu plan."
+            "Tu prueba gratuita vencio o tu cuenta no esta activa.\n"
+            "Agrega una tarjeta desde la app para reactivarla."
         )
         return
 
@@ -119,6 +119,17 @@ async def cb_propose(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> None:
     job = db.get_cached_job(job_id)
     if not job:
         await query.message.reply_text("No encontre datos del proyecto (puede ser muy antiguo).")
+        return
+
+    # Se consume la generacion recien aca, ya validado que el job
+    # existe -- asi un job vencido/inexistente no gasta cuota. El
+    # registro en usage_log ya lo hace try_consume_generation() de
+    # forma atomica, no hace falta loguearlo de nuevo despues.
+    if not db.try_consume_generation(user_id):
+        await query.message.reply_text(
+            "Alcanzaste el limite de generaciones de este periodo.\n"
+            "Compra +100 generaciones o espera a la renovacion."
+        )
         return
 
     thinking = await query.message.reply_text("Claude esta redactando la propuesta...")
@@ -134,8 +145,6 @@ async def cb_propose(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> None:
         await thinking.delete()
     except Exception:
         pass
-
-    db.log_usage(user_id, "proposal_generated", {"job_id": job_id})
 
     for chunk in _split_chunks(text, 4000):
         await query.message.reply_text(chunk)

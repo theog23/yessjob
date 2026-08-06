@@ -38,7 +38,7 @@ export default async function DashboardLayout({
             <div className="glass rounded-2xl p-4">
               <p className="label-eyebrow">plan</p>
               <p className="mt-1 font-serif text-lg capitalize text-ink-0">
-                {active?.plan_slug ?? "free"}
+                {active?.plan_slug ?? "Prueba vencida"}
               </p>
               <div className="mt-3 flex items-center gap-1.5">
                 <span

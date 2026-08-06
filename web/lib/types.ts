@@ -9,7 +9,7 @@ export type Plan = {
   max_sectors: number;
   max_keywords: number;
   min_scrape_interval_min: number;
-  max_proposals_per_day: number;
+  max_generations_per_month: number;
 };
 
 export type Sector = {
@@ -28,6 +28,27 @@ export type Subscription = {
   status: "active" | "paused" | "expired" | "canceled";
   starts_at: string;
   expires_at: string | null;
+  current_period_start: string;
+};
+
+export type GenerationPurchase = {
+  id: string;
+  user_id: string;
+  quantity: number;
+  remaining: number;
+  purchased_at: string;
+  expires_at: string;
+};
+
+export type GenerationBalance = {
+  base_limit: number;
+  base_used: number;
+  base_remaining: number;
+  purchased_remaining: number;
+  next_purchase_expiry: string | null;
+  period_start: string;
+  trial_expires_at: string | null;
+  is_active: boolean;
 };
 
 export type UserPlatform = {

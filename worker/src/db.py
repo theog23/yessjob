@@ -2,7 +2,7 @@
 Cliente Supabase (service role) para el worker.
 Bypassa RLS y accede a todas las tablas.
 """
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from typing import Any
 from supabase import create_client, Client
 from src.config import SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
@@ -177,19 +177,20 @@ def get_profile(user_id: str) -> dict | None:
 
 
 # --------------------------------------------------------
-#  Cuotas
+#  Cuotas de generaciones IA (cupo mensual + compras extra)
 # --------------------------------------------------------
-def proposals_today(user_id: str) -> int:
-    since = (datetime.now(timezone.utc) - timedelta(days=1)).isoformat()
-    r = (
-        sb().table("usage_log")
-        .select("id", count="exact")
-        .eq("user_id", user_id)
-        .eq("action", "proposal_generated")
-        .gte("created_at", since)
-        .execute()
-    )
-    return r.count or 0
+def try_consume_generation(user_id: str) -> bool:
+    """Intenta consumir una generacion (cupo base del mes, o si esta
+    agotado, el lote comprado mas proximo a vencer). Atomico del lado
+    de la base de datos -- ver try_consume_generation() en
+    supabase/migrations/20260806000015_generation_quota_rpc.sql."""
+    r = sb().rpc("try_consume_generation", {"p_user_id": user_id}).execute()
+    return bool(r.data)
+
+
+def get_generation_balance(user_id: str) -> dict | None:
+    r = sb().rpc("get_generation_balance", {"p_user_id": user_id}).execute()
+    return r.data[0] if r.data else None
 
 
 def log_usage(user_id: str, action: str, metadata: dict[str, Any] | None = None) -> None:

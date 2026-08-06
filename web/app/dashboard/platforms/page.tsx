@@ -30,10 +30,16 @@ export default async function PlatformsPage() {
       <p className="label-eyebrow mb-2">configuracion</p>
       <h1 className="font-serif text-3xl text-ink-0">Plataformas</h1>
       <p className="mt-2 max-w-lg text-sm text-ink-500">
-        Cada combinacion de plataforma y rubro es un filtro independiente. Tu
-        plan <span className="font-medium capitalize text-ink-300">{plan?.plan_slug ?? "free"}</span>{" "}
-        permite hasta {plan?.max_sectors ?? 1} filtro(s) y {plan?.max_keywords ?? 5} palabras
-        clave por filtro.
+        {plan ? (
+          <>
+            Cada combinacion de plataforma y rubro es un filtro independiente. Tu
+            plan <span className="font-medium capitalize text-ink-300">{plan.plan_slug}</span>{" "}
+            permite hasta {plan.max_sectors} filtro(s) y {plan.max_keywords} palabras
+            clave por filtro.
+          </>
+        ) : (
+          "Tu prueba gratuita vencio. Agrega una tarjeta desde Suscripcion para volver a configurar filtros."
+        )}
       </p>
 
       <div className="mt-8">

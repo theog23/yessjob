@@ -3,6 +3,7 @@ import { Archivo } from "next/font/google";
 import { Logo } from "@/components/logo";
 import { Reveal } from "@/components/reveal";
 import { ScrollWords } from "@/components/scroll-words";
+import { ShrinkingLogo } from "@/components/shrinking-logo";
 import { createClient } from "@/lib/supabase/server";
 import type { Plan } from "@/lib/types";
 
@@ -13,21 +14,23 @@ const archivo = Archivo({
 
 export default async function LandingPage() {
   const supabase = await createClient();
-  const { data: plans } = await supabase
+  const { data: plan } = await supabase
     .from("plans")
     .select("*")
+    .eq("slug", "pro")
     .eq("is_active", true)
-    .order("price_usd", { ascending: true });
+    .maybeSingle();
 
   return (
     <main className="relative min-h-screen overflow-x-clip bg-ink-950">
       <Header />
       <Hero />
       <Explainer />
+      <AiProposals />
       <ScrollStatement />
       <Marquee />
       <HowItWorks />
-      <Plans plans={(plans as Plan[]) ?? []} />
+      <Plans plan={plan as Plan | null} />
       <FinalCta />
       <Footer />
     </main>
@@ -68,29 +71,16 @@ function Hero() {
     <section className="relative flex min-h-[85vh] flex-col justify-center px-6 py-20 md:min-h-[92vh] md:px-10 md:py-0">
       <Reveal>
         <h1
-          className={`${archivo.className} relative mx-auto max-w-5xl text-balance text-center text-[clamp(2rem,10.8vw,3rem)] font-[800] leading-[1.15] tracking-[-0.03em] text-ink-0 md:text-[7rem] md:leading-[0.92]`}
+          className={`${archivo.className} mx-auto max-w-5xl text-balance text-center text-[clamp(2rem,10.8vw,3rem)] font-[800] leading-[1.15] tracking-[-0.03em] text-ink-0 md:text-[7rem] md:leading-[0.92]`}
         >
           <span className="block">Nunca dejamos</span>
           <span className="block">de buscar.</span>
-
-          <span className="pointer-events-none absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center">
-            <Logo size="lg" />
-          </span>
         </h1>
       </Reveal>
 
-      <Reveal delay={150}>
-        <div className="mx-auto mt-10 flex max-w-2xl flex-col items-start gap-3 text-left sm:flex-row sm:items-end sm:justify-between sm:gap-6">
-          <p className="text-xs text-ink-500">
-            ©{new Date().getFullYear()}
-            <br />
-            yessjob
-          </p>
-          <p className="text-left text-xs text-ink-500 sm:text-right">
-            /MONITOREANDO
-            <br />
-            DESDE HOY
-          </p>
+      <Reveal delay={100}>
+        <div className="mt-6 md:mt-10">
+          <ShrinkingLogo />
         </div>
       </Reveal>
     </section>
@@ -103,14 +93,14 @@ function Explainer() {
       <div className="mx-auto grid max-w-5xl gap-10 md:grid-cols-[300px_1fr] md:gap-16">
         <Reveal>
           <h2 className={`${archivo.className} text-6xl font-[700] tracking-tight text-ink-0 md:text-7xl`}>
-            Hola.
+            ¡Hola!
           </h2>
         </Reveal>
 
         <div className="space-y-6">
           <Reveal delay={80}>
             <p className="text-balance text-xl font-medium leading-snug text-ink-0 md:text-2xl">
-              yessjob es un servicio que vigila Workana, Freelancer y Upwork
+              yessjob es un servicio que vigila Workana, Freelancer.com y Upwork
               por ti, todo el dia, y avisa por Telegram apenas aparece
               un proyecto de tu rubro.
             </p>
@@ -125,6 +115,44 @@ function Explainer() {
             </p>
           </Reveal>
         </div>
+      </div>
+    </section>
+  );
+}
+
+function AiProposals() {
+  return (
+    <section className="px-6 py-24 md:px-10 md:py-32">
+      <div className="mx-auto max-w-4xl">
+        <Reveal>
+          <p className="label-eyebrow mb-4">Propuestas con IA</p>
+          <h2
+            className={`${archivo.className} text-balance text-4xl font-[800] tracking-tight text-ink-0 md:text-6xl`}
+          >
+            <span className="block">Tu estilo y su inteligencia.</span>
+            <span className="block">La propuesta perfecta.</span>
+          </h2>
+        </Reveal>
+
+        <Reveal delay={100}>
+          <p className="mt-8 max-w-xl text-balance text-base leading-relaxed text-ink-500 md:text-lg">
+            Pegas una propuesta tuya que te haya funcionado, o describes como
+            te gusta escribir. La IA la combina con cada proyecto nuevo y te
+            entrega una propuesta lista para enviar, sin salir de Telegram.
+          </p>
+        </Reveal>
+
+        <Reveal delay={180}>
+          <div
+            className={`${archivo.className} mt-12 flex flex-wrap items-center gap-4 text-lg font-[800] tracking-tight text-ink-0 md:text-2xl`}
+          >
+            <span className="rounded-full border border-ink-800 px-5 py-2">Tu estilo</span>
+            <span className="text-ink-600">+</span>
+            <span className="rounded-full border border-ink-800 px-5 py-2">El proyecto</span>
+            <span className="text-ink-600">=</span>
+            <span className="rounded-full bg-ink-0 px-5 py-2 text-ink-950">Propuesta lista</span>
+          </div>
+        </Reveal>
       </div>
     </section>
   );
@@ -208,18 +236,14 @@ function HowItWorks() {
   );
 }
 
-function Plans({ plans }: { plans: Plan[] }) {
-  if (!plans.length) return null;
+function Plans({ plan }: { plan: Plan | null }) {
+  if (!plan) return null;
 
-  const rows: { label: string; get: (p: Plan) => string }[] = [
-    { label: "Plataformas", get: (p) => `${p.max_platforms}` },
-    { label: "Rubros", get: (p) => `${p.max_sectors}` },
-    { label: "Palabras clave", get: (p) => `${p.max_keywords}` },
-    { label: "Frecuencia de avisos", get: (p) => `Cada ${p.min_scrape_interval_min} min` },
-    {
-      label: "Propuestas asistidas",
-      get: (p) => (p.max_proposals_per_day >= 999 ? "Ilimitadas" : `${p.max_proposals_per_day}/dia`),
-    },
+  const features = [
+    "3 plataformas: Workana, Freelancer.com y Upwork",
+    "Avisos cada minuto, sin pausas",
+    "100 generaciones de propuestas con IA por mes",
+    "Generaciones extra: +100 por $2 cuando las necesites",
   ];
 
   return (
@@ -228,50 +252,36 @@ function Plans({ plans }: { plans: Plan[] }) {
         <Reveal>
           <p className="label-eyebrow mb-4">Planes</p>
           <h2 className={`${archivo.className} text-balance text-3xl font-[800] tracking-tight text-ink-0 md:text-4xl`}>
-            Empieza gratis. Escala cuando lo necesites.
+            Un plan. Todo incluido.
           </h2>
         </Reveal>
 
-        <div className="mt-12 grid gap-5 md:grid-cols-3">
-          {plans.map((p, i) => {
-            const featured = i === 1;
-            return (
-              <Reveal key={p.id} delay={100 + i * 80}>
-                <div
-                  className={`flex h-full flex-col rounded-3xl border p-7 ${
-                    featured ? "border-ink-0 bg-ink-0 text-ink-950" : "border-ink-800 text-ink-0"
-                  }`}
-                >
-                  <p className={`label-eyebrow ${featured ? "!text-ink-600" : ""}`}>{p.name}</p>
-                  <p className={`${archivo.className} mt-3 text-3xl font-[800]`}>
-                    {p.price_usd === 0 ? "Gratis" : `$${p.price_usd}`}
-                    {p.price_usd > 0 && <span className="text-sm font-normal opacity-50">/mes</span>}
-                  </p>
+        <Reveal delay={100}>
+          <div className="mx-auto mt-12 max-w-md rounded-3xl border border-ink-0 bg-ink-0 p-8 text-ink-950">
+            <p className="label-eyebrow !text-ink-600">{plan.name}</p>
+            <p className={`${archivo.className} mt-3 text-5xl font-[800]`}>
+              ${plan.price_usd}
+              <span className="text-base font-normal opacity-50">/mes</span>
+            </p>
+            <p className="mt-2 text-sm text-ink-600">15 dias gratis, sin tarjeta.</p>
 
-                  <ul className={`mt-7 flex-1 space-y-3 border-t pt-6 text-sm ${featured ? "border-ink-300" : "border-ink-800"}`}>
-                    {rows.map((row) => (
-                      <li key={row.label} className="flex items-center justify-between gap-4">
-                        <span className={featured ? "text-ink-600" : "text-ink-500"}>{row.label}</span>
-                        <span className="font-medium">{row.get(p)}</span>
-                      </li>
-                    ))}
-                  </ul>
+            <ul className="mt-7 space-y-3 border-t border-ink-300 pt-6 text-sm">
+              {features.map((f) => (
+                <li key={f} className="flex items-start gap-2">
+                  <span className="mt-0.5 text-ink-600">✓</span>
+                  <span>{f}</span>
+                </li>
+              ))}
+            </ul>
 
-                  <Link
-                    href="/register"
-                    className={
-                      featured
-                        ? "mt-7 inline-flex w-full items-center justify-center rounded-full bg-ink-950 px-6 py-3 text-sm font-medium text-ink-0 transition-transform hover:scale-[1.02]"
-                        : "btn-secondary mt-7 w-full"
-                    }
-                  >
-                    Empezar
-                  </Link>
-                </div>
-              </Reveal>
-            );
-          })}
-        </div>
+            <Link
+              href="/register"
+              className="mt-7 inline-flex w-full items-center justify-center rounded-full bg-ink-950 px-6 py-3 text-sm font-medium text-ink-0 transition-transform hover:scale-[1.02]"
+            >
+              Empezar prueba gratis
+            </Link>
+          </div>
+        </Reveal>
       </div>
     </section>
   );
