@@ -76,3 +76,23 @@ export type Profile = {
   full_name: string | null;
   proposal_style: string | null;
 };
+
+export type ScrapedJob = {
+  id: string;
+  platform: Platform;
+  title: string;
+  description: string | null;
+  url: string;
+  budget_str: string | null;
+  budget_usd: number | null;
+  skills: string[] | null;
+  posted_at: string | null;
+};
+
+export type NotifiedJob = ScrapedJob & { sent_at: string };
+
+export type GeneratedProposal = {
+  job_id: string;
+  proposal_text: string;
+  created_at: string;
+};
