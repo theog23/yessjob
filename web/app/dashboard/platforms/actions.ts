@@ -94,12 +94,29 @@ export async function addFilter(_prev: FormState, formData: FormData): Promise<F
 
   const platform = String(formData.get("platform") ?? "");
   const sectorId = String(formData.get("sector_id") ?? "");
+  const skillIdsRaw = String(formData.get("freelancer_skill_ids") ?? "");
   const keywords = parseKeywords(String(formData.get("keywords") ?? ""));
   const excluded = parseKeywords(String(formData.get("excluded_keywords") ?? ""));
   const minBudget = Number(formData.get("min_budget_usd") ?? 0) || 0;
 
-  if (!platform || !sectorId) {
-    return { error: "Elegi una plataforma y un sector." };
+  if (platform !== "workana" && platform !== "freelancer" && platform !== "upwork") {
+    return { error: "Elegi una plataforma valida." };
+  }
+
+  if (platform === "workana" && !sectorId) {
+    return { error: "Elegi un sector." };
+  }
+
+  const skillIds = skillIdsRaw
+    ? skillIdsRaw
+        .split(",")
+        .map((s) => Number(s.trim()))
+        .filter((n) => Number.isInteger(n))
+        .slice(0, 200)
+    : [];
+
+  if (platform === "freelancer" && skillIds.length === 0) {
+    return { error: "Elegi al menos un skill." };
   }
 
   const { data: plan } = await supabase
@@ -114,7 +131,7 @@ export async function addFilter(_prev: FormState, formData: FormData): Promise<F
 
   const { data: existing } = await supabase
     .from("user_platforms")
-    .select("id, platform, sector_id")
+    .select("id, platform")
     .eq("user_id", user.id);
 
   const distinctPlatforms = new Set((existing ?? []).map((r) => r.platform));
@@ -124,17 +141,22 @@ export async function addFilter(_prev: FormState, formData: FormData): Promise<F
   }
 
   if ((existing?.length ?? 0) >= plan.max_sectors) {
-    return { error: `Tu plan permite hasta ${plan.max_sectors} combinacion(es) de sector.` };
+    return { error: `Tu plan permite hasta ${plan.max_sectors} filtro(s).` };
   }
 
   if (keywords.length > plan.max_keywords) {
     return { error: `Tu plan permite hasta ${plan.max_keywords} keywords.` };
   }
 
+  if (platform === "freelancer" && skillIds.length > plan.max_keywords) {
+    return { error: `Tu plan permite hasta ${plan.max_keywords} skills.` };
+  }
+
   const { error } = await supabase.from("user_platforms").insert({
     user_id: user.id,
     platform,
-    sector_id: sectorId,
+    sector_id: platform === "workana" ? sectorId : null,
+    freelancer_skill_ids: platform === "freelancer" ? skillIds : null,
     keywords,
     excluded_keywords: excluded,
     min_budget_usd: minBudget,
@@ -142,7 +164,10 @@ export async function addFilter(_prev: FormState, formData: FormData): Promise<F
 
   if (error) {
     if (error.code === "23505") {
-      return { error: "Ya tenes un filtro para esa plataforma y sector." };
+      return { error: "Ya tenes un filtro igual para esa plataforma." };
+    }
+    if (error.code === "23514") {
+      return { error: "Faltan datos requeridos para esa plataforma." };
     }
     return { error: "No se pudo guardar el filtro." };
   }

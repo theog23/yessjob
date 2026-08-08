@@ -55,12 +55,19 @@ export type UserPlatform = {
   id: string;
   user_id: string;
   platform: Platform;
-  sector_id: string;
+  sector_id: string | null;
+  freelancer_skill_ids: number[] | null;
   keywords: string[];
   excluded_keywords: string[];
   min_budget_usd: number;
   is_active: boolean;
   created_at: string;
+};
+
+export type FreelancerSkill = {
+  id: number;
+  name: string;
+  category: string | null;
 };
 
 export type TelegramLink = {

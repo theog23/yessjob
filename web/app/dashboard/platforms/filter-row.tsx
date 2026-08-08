@@ -3,17 +3,20 @@
 import { useTransition } from "react";
 import { toggleFilter, deleteFilter } from "./actions";
 import type { UserPlatform } from "@/lib/types";
+import { platformFilterLabel } from "@/lib/platform-filter-label";
 
 type Row = UserPlatform & { sectors: { name: string } | null };
 
 export function FilterRow({ row }: { row: Row }) {
   const [isPending, startTransition] = useTransition();
+  const label = platformFilterLabel(row);
 
   return (
     <div className="flex items-center justify-between gap-4 px-5 py-4">
       <div className="min-w-0">
         <p className="text-sm font-medium capitalize text-ink-0">
-          {row.platform} · {row.sectors?.name ?? "—"}
+          {row.platform}
+          {label && ` · ${label}`}
         </p>
         <p className="mt-1 truncate text-xs text-ink-500">
           {row.keywords.length > 0 ? row.keywords.join(", ") : "sin palabras clave especificas"}

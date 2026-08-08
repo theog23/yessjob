@@ -2,13 +2,15 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import { addFilter, previewMatches, type FormState, type PreviewJob } from "./actions";
-import type { Sector } from "@/lib/types";
+import type { Platform, Sector } from "@/lib/types";
+import { SkillPicker } from "./skill-picker";
 
 const initialState: FormState = { error: null };
 
-export function AddFilterForm({ sectors }: { sectors: Sector[] }) {
+export function AddFilterForm({ sectors, maxSkills }: { sectors: Sector[]; maxSkills: number }) {
   const [state, formAction, pending] = useActionState(addFilter, initialState);
   const [open, setOpen] = useState(false);
+  const [platform, setPlatform] = useState<Platform | "">("");
   const submittedRef = useRef(false);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -21,6 +23,7 @@ export function AddFilterForm({ sectors }: { sectors: Sector[] }) {
     if (!pending && submittedRef.current && state.error === null) {
       submittedRef.current = false;
       setOpen(false);
+      setPlatform("");
     }
   }, [pending, state]);
 
@@ -55,10 +58,16 @@ export function AddFilterForm({ sectors }: { sectors: Sector[] }) {
       }}
       className="panel space-y-5 rounded-3xl p-6"
     >
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className={`grid gap-5 ${platform === "upwork" ? "" : "sm:grid-cols-2"}`}>
         <div>
           <label className="label-eyebrow mb-2 block">Plataforma</label>
-          <select name="platform" required className="field-input" defaultValue="">
+          <select
+            name="platform"
+            required
+            className="field-input"
+            value={platform}
+            onChange={(e) => setPlatform(e.target.value as Platform | "")}
+          >
             <option value="" disabled>
               Elegi una plataforma
             </option>
@@ -67,20 +76,25 @@ export function AddFilterForm({ sectors }: { sectors: Sector[] }) {
             <option value="upwork">Upwork</option>
           </select>
         </div>
-        <div>
-          <label className="label-eyebrow mb-2 block">Sector</label>
-          <select name="sector_id" required className="field-input" defaultValue="">
-            <option value="" disabled>
-              Elegi un sector
-            </option>
-            {sectors.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
+
+        {platform === "workana" && (
+          <div>
+            <label className="label-eyebrow mb-2 block">Sector</label>
+            <select name="sector_id" required className="field-input" defaultValue="">
+              <option value="" disabled>
+                Elegi un sector
               </option>
-            ))}
-          </select>
-        </div>
+              {sectors.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
+
+      {platform === "freelancer" && <SkillPicker key="freelancer-skills" maxSkills={maxSkills} />}
 
       <div>
         <label className="label-eyebrow mb-2 block">
@@ -155,8 +169,8 @@ export function AddFilterForm({ sectors }: { sectors: Sector[] }) {
           {previewJobs.length === 0 ? (
             <p className="text-sm text-ink-500">
               Sin ejemplos recientes para estos filtros todavia. Eso no
-              significa que este mal — apenas empecemos a monitorear tu
-              sector te va a llegar el primero.
+              significa que este mal, apenas empecemos a monitorear te va
+              a llegar el primero.
             </p>
           ) : (
             <ul className="space-y-2">

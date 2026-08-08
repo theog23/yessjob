@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { UserPlatform } from "@/lib/types";
+import { platformFilterLabel } from "@/lib/platform-filter-label";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -84,7 +85,8 @@ export default async function DashboardPage() {
               <div key={r.id} className="flex items-center justify-between px-6 py-4">
                 <div>
                   <p className="text-sm font-medium capitalize text-ink-0">
-                    {r.platform} · {r.sectors?.name ?? "—"}
+                    {r.platform}
+                    {platformFilterLabel(r) && ` · ${platformFilterLabel(r)}`}
                   </p>
                   <p className="mt-1 text-xs text-ink-500">
                     {r.keywords.length > 0 ? r.keywords.join(", ") : "sin palabras clave especificas"}

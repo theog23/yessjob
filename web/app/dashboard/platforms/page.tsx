@@ -51,7 +51,7 @@ export default async function PlatformsPage() {
           </div>
         )}
 
-        <AddFilterForm sectors={(sectors as Sector[]) ?? []} />
+        <AddFilterForm sectors={(sectors as Sector[]) ?? []} maxSkills={plan?.max_keywords ?? 20} />
       </div>
     </div>
   );
