@@ -165,15 +165,16 @@ def touch_activity(user_id: str) -> None:
     ).eq("user_id", user_id).execute()
 
 
-def get_profile(user_id: str) -> dict | None:
+def get_proposal_style(user_id: str, platform: str) -> str | None:
     r = (
-        sb().table("profiles")
-        .select("full_name, proposal_style")
-        .eq("id", user_id)
+        sb().table("user_proposal_styles")
+        .select("style")
+        .eq("user_id", user_id)
+        .eq("platform", platform)
         .limit(1)
         .execute()
     )
-    return r.data[0] if r.data else None
+    return r.data[0]["style"] if r.data else None
 
 
 # --------------------------------------------------------

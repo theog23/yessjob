@@ -1,7 +1,7 @@
 """
 Servicio de generacion de propuestas con Claude.
 Portado del bot Workana original, ahora con estilo personalizable por
-usuario (profiles.proposal_style).
+usuario y por plataforma (user_proposal_styles).
 """
 import logging
 import random

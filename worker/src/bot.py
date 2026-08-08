@@ -134,8 +134,7 @@ async def cb_propose(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> None:
 
     thinking = await query.message.reply_text("Claude esta redactando la propuesta...")
 
-    profile_row = db.get_profile(user_id)
-    proposal_style = profile_row.get("proposal_style") if profile_row else None
+    proposal_style = db.get_proposal_style(user_id, job["platform"])
 
     import asyncio
     loop = asyncio.get_event_loop()

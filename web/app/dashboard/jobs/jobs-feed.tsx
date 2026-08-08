@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { generateProposalAction } from "./actions";
 import type { GeneratedProposal, NotifiedJob, Platform } from "@/lib/types";
@@ -10,6 +10,8 @@ const PLATFORM_LABEL: Record<Platform, string> = {
   freelancer: "Freelancer.com",
   upwork: "Upwork",
 };
+
+const PLATFORM_ORDER: Platform[] = ["workana", "freelancer", "upwork"];
 
 const JOB_COLUMNS = "id, platform, title, description, url, budget_str, budget_usd, skills, posted_at";
 
@@ -33,6 +35,28 @@ export function JobsFeed({ userId, initialJobs, initialProposals }: JobsFeedProp
   const [proposals, setProposals] = useState<Record<string, string>>(() =>
     Object.fromEntries(initialProposals.map((p) => [p.job_id, p.proposal_text])),
   );
+  const [hiddenPlatforms, setHiddenPlatforms] = useState<Set<Platform>>(() => new Set());
+
+  // Se calcula sobre `jobs` completo (no sobre lo ya filtrado) para que un
+  // chip no desaparezca de golpe justo cuando se lo clickea.
+  const platformsPresent = useMemo(() => {
+    const present = new Set<Platform>(jobs.map((j) => j.platform));
+    return PLATFORM_ORDER.filter((p) => present.has(p));
+  }, [jobs]);
+
+  const visibleJobs = useMemo(
+    () => jobs.filter((j) => !hiddenPlatforms.has(j.platform)),
+    [jobs, hiddenPlatforms],
+  );
+
+  function togglePlatform(platform: Platform) {
+    setHiddenPlatforms((prev) => {
+      const next = new Set(prev);
+      if (next.has(platform)) next.delete(platform);
+      else next.add(platform);
+      return next;
+    });
+  }
 
   useEffect(() => {
     if (!userId) return;
@@ -92,14 +116,44 @@ export function JobsFeed({ userId, initialJobs, initialProposals }: JobsFeedProp
 
   return (
     <div className="space-y-4">
-      {jobs.map((job) => (
-        <JobCard
-          key={job.id}
-          job={job}
-          proposalText={proposals[job.id] ?? null}
-          onGenerated={(text) => setProposals((prev) => ({ ...prev, [job.id]: text }))}
-        />
-      ))}
+      {platformsPresent.length > 1 && (
+        <div className="flex flex-wrap gap-2">
+          {platformsPresent.map((p) => {
+            const active = !hiddenPlatforms.has(p);
+            return (
+              <button
+                key={p}
+                onClick={() => togglePlatform(p)}
+                className={`glass rounded-full px-4 py-1.5 text-xs transition-opacity ${
+                  active ? "text-ink-0" : "text-ink-600 opacity-60"
+                }`}
+              >
+                {PLATFORM_LABEL[p]}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {visibleJobs.length === 0 ? (
+        <div className="panel rounded-3xl p-8 text-center">
+          <p className="text-sm text-ink-500">
+            No hay proyectos para las plataformas seleccionadas.
+          </p>
+          <button onClick={() => setHiddenPlatforms(new Set())} className="btn-secondary mt-4">
+            Mostrar todas
+          </button>
+        </div>
+      ) : (
+        visibleJobs.map((job) => (
+          <JobCard
+            key={job.id}
+            job={job}
+            proposalText={proposals[job.id] ?? null}
+            onGenerated={(text) => setProposals((prev) => ({ ...prev, [job.id]: text }))}
+          />
+        ))
+      )}
     </div>
   );
 }

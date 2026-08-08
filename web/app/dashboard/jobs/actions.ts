@@ -31,12 +31,14 @@ export async function generateProposalAction(jobId: string): Promise<ProposalRes
   // notifications_sent(user_id=auth.uid(), job_id) -- ver policy
   // scraped_jobs_select_notified. Esta es la autorizacion: no hace
   // falta un chequeo de "es tuyo" aparte.
-  const [{ data: job }, { data: profile }] = await Promise.all([
+  const [{ data: job }, { data: styles }] = await Promise.all([
     supabase.from("scraped_jobs").select(JOB_COLUMNS).eq("id", jobId).maybeSingle(),
-    supabase.from("profiles").select("proposal_style").eq("id", user.id).maybeSingle(),
+    supabase.from("user_proposal_styles").select("platform, style").eq("user_id", user.id),
   ]);
 
   if (!job) return { ok: false, error: "No encontramos ese proyecto." };
+
+  const proposalStyle = styles?.find((s) => s.platform === job.platform)?.style ?? null;
 
   // Cuota: RPC service_role-only, invocada con el user.id verificado
   // por el server (nunca un valor que mande el cliente).
@@ -58,7 +60,7 @@ export async function generateProposalAction(jobId: string): Promise<ProposalRes
   }
 
   const anthropic = new Anthropic({ apiKey });
-  const prompt = buildProposalPrompt(job, DEFAULT_PROFILE, profile?.proposal_style ?? null);
+  const prompt = buildProposalPrompt(job, DEFAULT_PROFILE, proposalStyle);
 
   let text: string;
   try {

@@ -190,3 +190,34 @@ export async function deleteFilter(id: string) {
   revalidatePath("/dashboard/platforms");
   revalidatePath("/dashboard");
 }
+
+export type ProposalStyleState = { error: string | null; success?: boolean };
+
+const MAX_STYLE_LEN = 3000;
+
+export async function updateProposalStyle(
+  platform: string,
+  _prev: ProposalStyleState,
+  formData: FormData,
+): Promise<ProposalStyleState> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Sesion invalida." };
+
+  const raw = String(formData.get("style") ?? "").trim();
+  if (raw.length > MAX_STYLE_LEN) {
+    return { error: `Maximo ${MAX_STYLE_LEN} caracteres.` };
+  }
+
+  const { error } = await supabase.from("user_proposal_styles").upsert(
+    { user_id: user.id, platform, style: raw || null, updated_at: new Date().toISOString() },
+    { onConflict: "user_id,platform" },
+  );
+
+  if (error) return { error: "No se pudo guardar." };
+
+  revalidatePath("/dashboard/platforms");
+  return { error: null, success: true };
+}

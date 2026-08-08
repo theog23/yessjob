@@ -8,7 +8,6 @@ const links = [
   { href: "/dashboard/jobs", label: "Trabajos" },
   { href: "/dashboard/platforms", label: "Plataformas" },
   { href: "/dashboard/telegram", label: "Telegram" },
-  { href: "/dashboard/profile", label: "Perfil" },
   { href: "/dashboard/subscription", label: "Suscripcion" },
 ];
 

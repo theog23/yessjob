@@ -81,7 +81,13 @@ export type Profile = {
   id: string;
   email: string;
   full_name: string | null;
-  proposal_style: string | null;
+};
+
+export type UserProposalStyle = {
+  user_id: string;
+  platform: Platform;
+  style: string | null;
+  updated_at: string;
 };
 
 export type ScrapedJob = {
