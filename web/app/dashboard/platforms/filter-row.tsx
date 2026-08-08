@@ -38,7 +38,7 @@ export function FilterRow({ row }: { row: Row }) {
           disabled={isPending}
           onClick={() => startTransition(() => deleteFilter(row.id))}
           className="text-ink-600 hover:text-ink-0"
-          aria-label="Eliminar filtro"
+          aria-label="Eliminar plataforma"
         >
           ✕
         </button>

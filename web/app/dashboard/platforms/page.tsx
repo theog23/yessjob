@@ -41,13 +41,15 @@ export default async function PlatformsPage() {
       <p className="mt-2 max-w-lg text-sm text-ink-500">
         {plan ? (
           <>
-            Cada combinacion de plataforma y rubro es un filtro independiente. Tu
+            Elige en que plataformas buscamos por ti. Por cada una defines tu
+            rubro o tus skills, y las palabras clave que hacen que un proyecto
+            te interese, apenas aparece te avisamos por Telegram. Tu
             plan <span className="font-medium capitalize text-ink-300">{plan.plan_slug}</span>{" "}
-            permite hasta {plan.max_sectors} filtro(s) y {plan.max_keywords} palabras
-            clave por filtro.
+            te permite activar hasta {plan.max_platforms} plataformas, con hasta{" "}
+            {plan.max_keywords} palabras clave por plataforma.
           </>
         ) : (
-          "Tu prueba gratuita vencio. Agrega una tarjeta desde Suscripcion para volver a configurar filtros."
+          "Tu prueba gratuita vencio. Agrega una tarjeta desde Suscripcion para volver a activar tus plataformas."
         )}
       </p>
 
@@ -66,13 +68,17 @@ export default async function PlatformsPage() {
       {platformsPresent.length > 0 && (
         <div className="mt-12">
           <p className="label-eyebrow mb-2">personalizacion</p>
-          <h2 className="font-serif text-xl text-ink-0">Personalizar propuestas por plataforma</h2>
-          <p className="mt-2 max-w-lg text-sm text-ink-500">
-            Definí como querés sonar en cada plataforma. Podés dejarlo vacío y
-            usamos una plantilla general.
+          <h2 className="font-serif text-xl text-ink-0">Como escribe la IA tus propuestas</h2>
+          <p className="mt-2 max-w-2xl text-sm text-ink-500">
+            Cuando generas una propuesta con IA para un proyecto, la IA usa
+            exactamente lo que hayas escrito para esa plataforma: pega una
+            propuesta tuya que ya te haya funcionado, o describe el saludo,
+            el tono y la estructura que quieres que siga. Cada plataforma
+            tiene su propio estilo, por si te conviene sonar distinto en
+            cada una. Si lo dejas vacio, usamos una plantilla general.
           </p>
 
-          <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          <div className="mt-6 space-y-4">
             {platformsPresent.map((p) => (
               <ProposalStyleForm key={p} platform={p} initialValue={stylesByPlatform.get(p) ?? ""} />
             ))}

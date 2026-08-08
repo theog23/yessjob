@@ -38,7 +38,7 @@ export function ProposalStyleForm({
         <textarea
           name="style"
           defaultValue={initialValue}
-          rows={6}
+          rows={8}
           className="field-input resize-y"
           placeholder={
             "Pega una propuesta tuya que te haya funcionado en " +

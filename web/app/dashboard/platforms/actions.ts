@@ -100,11 +100,11 @@ export async function addFilter(_prev: FormState, formData: FormData): Promise<F
   const minBudget = Number(formData.get("min_budget_usd") ?? 0) || 0;
 
   if (platform !== "workana" && platform !== "freelancer" && platform !== "upwork") {
-    return { error: "Elegi una plataforma valida." };
+    return { error: "Elige una plataforma valida." };
   }
 
   if (platform === "workana" && !sectorId) {
-    return { error: "Elegi un sector." };
+    return { error: "Elige un sector." };
   }
 
   const skillIds = skillIdsRaw
@@ -116,7 +116,7 @@ export async function addFilter(_prev: FormState, formData: FormData): Promise<F
     : [];
 
   if (platform === "freelancer" && skillIds.length === 0) {
-    return { error: "Elegi al menos un skill." };
+    return { error: "Elige al menos un skill." };
   }
 
   const { data: plan } = await supabase
@@ -137,19 +137,19 @@ export async function addFilter(_prev: FormState, formData: FormData): Promise<F
   const distinctPlatforms = new Set((existing ?? []).map((r) => r.platform));
   distinctPlatforms.add(platform);
   if (distinctPlatforms.size > plan.max_platforms) {
-    return { error: `Tu plan permite hasta ${plan.max_platforms} plataforma(s).` };
+    return { error: `Tu plan permite hasta ${plan.max_platforms} plataformas.` };
   }
 
   if ((existing?.length ?? 0) >= plan.max_sectors) {
-    return { error: `Tu plan permite hasta ${plan.max_sectors} filtro(s).` };
+    return { error: `Tu plan permite hasta ${plan.max_sectors} plataformas activas.` };
   }
 
   if (keywords.length > plan.max_keywords) {
-    return { error: `Tu plan permite hasta ${plan.max_keywords} keywords.` };
+    return { error: `Tu plan permite hasta ${plan.max_keywords} palabras clave por plataforma.` };
   }
 
   if (platform === "freelancer" && skillIds.length > plan.max_keywords) {
-    return { error: `Tu plan permite hasta ${plan.max_keywords} skills.` };
+    return { error: `Tu plan permite hasta ${plan.max_keywords} skills por plataforma.` };
   }
 
   const { error } = await supabase.from("user_platforms").insert({
@@ -164,12 +164,12 @@ export async function addFilter(_prev: FormState, formData: FormData): Promise<F
 
   if (error) {
     if (error.code === "23505") {
-      return { error: "Ya tenes un filtro igual para esa plataforma." };
+      return { error: "Ya tienes una configuracion igual para esa plataforma." };
     }
     if (error.code === "23514") {
       return { error: "Faltan datos requeridos para esa plataforma." };
     }
-    return { error: "No se pudo guardar el filtro." };
+    return { error: "No se pudo guardar la plataforma." };
   }
 
   revalidatePath("/dashboard/platforms");

@@ -4,13 +4,21 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import { addFilter, previewMatches, type FormState, type PreviewJob } from "./actions";
 import type { Platform, Sector } from "@/lib/types";
 import { SkillPicker } from "./skill-picker";
+import { SelectDropdown } from "./select-dropdown";
 
 const initialState: FormState = { error: null };
+
+const PLATFORM_OPTIONS = [
+  { value: "workana", label: "Workana" },
+  { value: "freelancer", label: "Freelancer.com" },
+  { value: "upwork", label: "Upwork" },
+];
 
 export function AddFilterForm({ sectors, maxSkills }: { sectors: Sector[]; maxSkills: number }) {
   const [state, formAction, pending] = useActionState(addFilter, initialState);
   const [open, setOpen] = useState(false);
   const [platform, setPlatform] = useState<Platform | "">("");
+  const [sectorId, setSectorId] = useState("");
   const submittedRef = useRef(false);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -24,6 +32,7 @@ export function AddFilterForm({ sectors, maxSkills }: { sectors: Sector[]; maxSk
       submittedRef.current = false;
       setOpen(false);
       setPlatform("");
+      setSectorId("");
     }
   }, [pending, state]);
 
@@ -45,7 +54,7 @@ export function AddFilterForm({ sectors, maxSkills }: { sectors: Sector[]; maxSk
   if (!open) {
     return (
       <button onClick={() => setOpen(true)} className="btn-secondary">
-        + Agregar filtro
+        + Agregar plataforma
       </button>
     );
   }
@@ -61,35 +70,28 @@ export function AddFilterForm({ sectors, maxSkills }: { sectors: Sector[]; maxSk
       <div className={`grid gap-5 ${platform === "upwork" ? "" : "sm:grid-cols-2"}`}>
         <div>
           <label className="label-eyebrow mb-2 block">Plataforma</label>
-          <select
+          <SelectDropdown
             name="platform"
-            required
-            className="field-input"
+            options={PLATFORM_OPTIONS}
             value={platform}
-            onChange={(e) => setPlatform(e.target.value as Platform | "")}
-          >
-            <option value="" disabled>
-              Elegi una plataforma
-            </option>
-            <option value="workana">Workana</option>
-            <option value="freelancer">Freelancer.com</option>
-            <option value="upwork">Upwork</option>
-          </select>
+            onChange={(v) => {
+              setPlatform(v as Platform);
+              setSectorId("");
+            }}
+            placeholder="Elige una plataforma"
+          />
         </div>
 
         {platform === "workana" && (
           <div>
             <label className="label-eyebrow mb-2 block">Sector</label>
-            <select name="sector_id" required className="field-input" defaultValue="">
-              <option value="" disabled>
-                Elegi un sector
-              </option>
-              {sectors.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
+            <SelectDropdown
+              name="sector_id"
+              options={sectors.map((s) => ({ value: s.id, label: s.name }))}
+              value={sectorId}
+              onChange={setSectorId}
+              placeholder="Elige un sector"
+            />
           </div>
         )}
       </div>
@@ -138,7 +140,7 @@ export function AddFilterForm({ sectors, maxSkills }: { sectors: Sector[]; maxSk
 
       <div className="flex flex-wrap gap-3">
         <button type="submit" disabled={pending} className="btn-primary">
-          {pending ? "Guardando..." : "Guardar filtro"}
+          {pending ? "Guardando..." : "Guardar plataforma"}
         </button>
         <button
           type="button"
@@ -146,7 +148,7 @@ export function AddFilterForm({ sectors, maxSkills }: { sectors: Sector[]; maxSk
           disabled={previewLoading}
           className="btn-secondary"
         >
-          {previewLoading ? "Buscando ejemplos..." : "Ver ejemplos con estos filtros"}
+          {previewLoading ? "Buscando ejemplos..." : "Ver ejemplos que coinciden"}
         </button>
         <button type="button" onClick={() => setOpen(false)} className="btn-ghost">
           Cancelar
@@ -168,7 +170,7 @@ export function AddFilterForm({ sectors, maxSkills }: { sectors: Sector[]; maxSk
           </p>
           {previewJobs.length === 0 ? (
             <p className="text-sm text-ink-500">
-              Sin ejemplos recientes para estos filtros todavia. Eso no
+              Sin ejemplos recientes para estos criterios todavia. Eso no
               significa que este mal, apenas empecemos a monitorear te va
               a llegar el primero.
             </p>
