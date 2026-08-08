@@ -26,6 +26,7 @@ export default async function LandingPage() {
       <Header />
       <Hero />
       <Explainer />
+      <Security />
       <AiProposals />
       <ScrollStatement />
       <Marquee />
@@ -102,7 +103,8 @@ function Explainer() {
             <p className="text-balance text-xl font-medium leading-snug text-ink-0 md:text-2xl">
               yessjob es un servicio que vigila Workana, Freelancer.com y Upwork
               por ti, todo el dia, y avisa por Telegram apenas aparece
-              un proyecto de tu rubro.
+              un proyecto de tu rubro. Cada aviso tambien queda guardado en tu
+              panel, con el historial completo de todo lo que te llego.
             </p>
           </Reveal>
           <Reveal delay={160}>
@@ -115,6 +117,47 @@ function Explainer() {
             </p>
           </Reveal>
         </div>
+      </div>
+    </section>
+  );
+}
+
+function Security() {
+  const points = ["Sin contrasenas", "Sin acceso a tu cuenta", "Tu cuenta, siempre tuya"];
+
+  return (
+    <section className="px-6 py-24 md:px-10 md:py-32">
+      <div className="mx-auto max-w-4xl">
+        <Reveal>
+          <p className="label-eyebrow mb-4">Seguridad</p>
+          <h2
+            className={`${archivo.className} text-balance text-4xl font-[800] tracking-tight text-ink-0 md:text-6xl`}
+          >
+            Tu cuenta, nunca en riesgo.
+          </h2>
+        </Reveal>
+
+        <Reveal delay={100}>
+          <p className="mt-8 max-w-xl text-balance text-base leading-relaxed text-ink-500 md:text-lg">
+            Nunca te pedimos tu contrasena ni acceso a tus cuentas de Workana,
+            Freelancer.com o Upwork. Miramos unicamente lo que cualquiera
+            puede ver publicamente, asi que tu cuenta nunca corre riesgo de
+            suspension por usar herramientas automatizadas.
+          </p>
+        </Reveal>
+
+        <Reveal delay={180}>
+          <div className="mt-10 flex flex-wrap gap-3">
+            {points.map((p) => (
+              <span
+                key={p}
+                className="rounded-full border border-ink-800 px-5 py-2 text-sm font-medium text-ink-0"
+              >
+                {p}
+              </span>
+            ))}
+          </div>
+        </Reveal>
       </div>
     </section>
   );
@@ -137,8 +180,9 @@ function AiProposals() {
         <Reveal delay={100}>
           <p className="mt-8 max-w-xl text-balance text-base leading-relaxed text-ink-500 md:text-lg">
             Pegas una propuesta tuya que te haya funcionado, o describes como
-            te gusta escribir. La IA la combina con cada proyecto nuevo y te
-            entrega una propuesta lista para enviar, sin salir de Telegram.
+            te gusta escribir, y puedes definir un estilo distinto para cada
+            plataforma. La IA lo combina con cada proyecto nuevo y te entrega
+            una propuesta lista para enviar, desde Telegram o desde tu panel.
           </p>
         </Reveal>
 
@@ -172,7 +216,7 @@ function ScrollStatement() {
 }
 
 function Marquee() {
-  const items = ["Workana", "Freelancer.com", "Upwork", "Siempre vigilando"];
+  const items = ["Workana", "Freelancer.com", "Upwork", "Siempre vigilando", "Sin riesgo para tu cuenta"];
   const track = [...items, ...items];
 
   return (
@@ -207,7 +251,7 @@ function HowItWorks() {
     {
       n: "03",
       title: "Recibe el aviso al instante",
-      body: "Apenas aparece un proyecto que coincide, te llega la notificacion con todo lo que necesitas para decidir, antes que la mayoria lo vea.",
+      body: "Apenas aparece un proyecto que coincide, te llega la notificacion por Telegram y queda guardado en tu panel, con todo lo que necesitas para decidir antes que la mayoria lo vea.",
     },
   ];
 
@@ -240,10 +284,11 @@ function Plans({ plan }: { plan: Plan | null }) {
   if (!plan) return null;
 
   const features = [
-    "3 plataformas: Workana, Freelancer.com y Upwork",
-    "Avisos cada minuto, sin pausas",
-    "100 generaciones de propuestas con IA por mes",
+    "3 plataformas: Workana, Freelancer.com y Upwork, cada una a su manera",
+    "Avisos cada minuto, por Telegram y en tu panel",
+    "100 generaciones de propuestas con IA por mes, con estilo propio por plataforma",
     "Generaciones extra: +100 por $2 cuando las necesites",
+    "Nunca pedimos tu contrasena ni acceso a tus cuentas",
   ];
 
   return (
@@ -297,7 +342,13 @@ function FinalCta() {
           Deja de buscar. Empieza a recibir.
         </h2>
       </Reveal>
-      <Reveal delay={100}>
+      <Reveal delay={80}>
+        <p className="mx-auto mt-5 max-w-md text-balance text-base text-ink-500">
+          Empieza con el plan Pro completo. 15 dias gratis, sin ingresar
+          tarjeta.
+        </p>
+      </Reveal>
+      <Reveal delay={140}>
         <div className="mt-9">
           <Link href="/register" className="btn-primary">
             Crear cuenta gratis
